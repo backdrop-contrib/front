@@ -116,6 +116,13 @@ function front_page_admin($form, &$form_state) {
     );
   }
 
+  // if the token module exists then provide global token support
+  if (module_exists('token')) {
+    $form['token_help'] = array(
+      '#theme' => 'token_tree',
+    );
+  }
+
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save Settings'),

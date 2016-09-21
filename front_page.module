@@ -195,6 +195,12 @@ function front_page_parse_url($path) {
       $url['options']['fragment'] = $match['fragment'];
     }
   }
+
+  // if the token module exists then replace any tokens in the path
+  if (module_exists('token')) {
+    $url['path'] = token_replace($url['path']);
+  }
+
   return $url;
 }
 
