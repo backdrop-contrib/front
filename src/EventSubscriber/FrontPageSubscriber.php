@@ -10,6 +10,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class FrontPageSubscriber implements EventSubscriberInterface {
 
   public function initData(GetResponseEvent $event) {
+    global $base_path;
 
     // Make sure front page module is not run when using cli (drush).
     // Make sur front page module does not run when installing Drupal either.
@@ -30,13 +31,16 @@ class FrontPageSubscriber implements EventSubscriberInterface {
     $isFrontPage = \Drupal::service('path.matcher')->isFrontPage();
     if (\Drupal::config('front_page.settings')->get('enable', '') && $isFrontPage) {
 
+
       $roles = \Drupal::currentUser()->getRoles();
       $config = \Drupal::configFactory()->get('front_page.settings');
       $current_weigth = null;
       foreach ($roles as $role) {
         $role_config = $config->get('rid_' . $role);
         if((isset($role_config['enabled']) && $role_config['enabled'] == true) && (($role_config['weigth'] < $current_weigth) || $current_weigth === null)) {
-          $front_page = $role_config['path'];
+          //$base_path can contain a / at the end, strip to avoid double slash.
+          $path = rtrim($base_path, '/');
+          $front_page = $path . $role_config['path'];
           $current_weigth = $role_config['weigth'];
         }
       }
