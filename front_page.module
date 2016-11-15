@@ -209,43 +209,44 @@ function front_page_parse_url($path) {
  */
 function front_page_get_by_role($index = 0, $number = 1) {
   global $user;
-  $result = db_select('front_page', 'fp')
-          ->fields('fp')
-          ->condition('rid', array_keys($user->roles))
-          ->condition('mode', '', '<>')
-          ->orderBy('weight', 'ASC')
-          ->orderBy('rid', 'DESC')
-          ->range($index, $number)
-          ->execute()
-          ->fetchAssoc();
-  return $result;
+
+  $roles = array();
+  foreach (array_keys($user->roles) as $rid) {
+    $roles[] = front_page_get_by_rid($rid);
+  }
+
+  $roles = array_filter($roles);
+
+  if (empty($roles)) {
+    return FALSE;
+  }
+
+  uasort($roles, '_front_page_sort');
+
+  return reset($roles);
 }
 
 /**
  * Function to return the first role enabled in front page, ordered by weight.
  */
 function front_page_get_by_rid($rid) {
-  $result = db_select('front_page', 'fp')
-          ->fields('fp')
-          ->condition('rid', $rid)
-          ->condition('mode', '', '<>')
-          ->execute()
-          ->fetchAssoc();
-  return $result;
+  $role = _front_page_get_by_rid_with_default($rid);
+
+  return !empty($role['mode']) ? $role : FALSE;
 }
 
 /**
  * Function to return all the roles in front page, ordered by weight.
  */
 function front_page_get_all() {
-  global $user;
-  $result = db_select('front_page', 'fp')
-          ->fields('fp')
-          ->orderBy('weight', 'ASC')
-          ->orderBy('rid', 'DESC')
-          ->execute()
-          ->fetchAllAssoc('rid', PDO::FETCH_ASSOC);
-  return $result;
+  $roles = array();
+  foreach (user_roles() as $rid => $role) {
+    $roles[$rid] = _front_page_get_by_rid_with_default($rid);
+  }
+
+  uasort($roles, '_front_page_sort');
+
+  return $roles;
 }
 
 /**
@@ -283,7 +284,39 @@ function front_page_theme() {
  */
 function front_page_user_role_delete($role) {
   // Delete Front configuration for the role being deleted.
-  db_delete('front_page')
-    ->condition('rid', $role->rid)
-    ->execute();
+  variable_del("front_page_role_{$role->rid}");
+}
+
+/**
+ * Function to return the first role enabled in front page, with defaults.
+ */
+function _front_page_get_by_rid_with_default($rid) {
+  return variable_get("front_page_role_{$rid}", array(
+    'rid' => $rid,
+    'mode' => '',
+    'data' => '',
+    'filter_format' => '',
+    'weight' => 0,
+  ));
+}
+
+/**
+ * Sort by weight ASC and rid DESC.
+ */
+function _front_page_sort($a, $b) {
+  $a_value = (is_array($a) && isset($a['weight'])) ? $a['weight'] : 0;
+  $b_value = (is_array($b) && isset($b['weight'])) ? $b['weight'] : 0;
+
+  if ($a_value != $b_value) {
+    return ($a_value < $b_value) ? -1 : 1;
+  }
+
+  $a_value = (is_array($a) && isset($a['rid'])) ? $a['rid'] : 0;
+  $b_value = (is_array($b) && isset($b['rid'])) ? $b['rid'] : 0;
+
+  if ($a_value != $b_value) {
+    return ($a_value > $b_value) ? -1 : 1;
+  }
+
+  return 0;
 }

@@ -168,41 +168,37 @@ function front_page_admin_validate($form, &$form_state) {
 function front_page_admin_submit($form, &$form_state) {
   variable_set('front_page_enable', $form_state['values']['front_page_enable']);
 
-  db_query("UPDATE {front_page} SET mode=''");
   if (is_array($form_state['values']['roles'])) {
     foreach ($form_state['values']['roles'] as $rid => $role) {
       switch ($role['mode']) {
         case 'themed':
         case 'full':
-          db_merge('front_page')
-              ->key(array('rid' => $rid))
-              ->fields(array(
-                'mode' => $role['mode'],
-                'data' => $role['data_wrapper']['data']['value'],
-                'filter_format' => $role['data_wrapper']['data']['format'],
-              ))
-              ->execute();
+          $data = _front_page_get_by_rid_with_default($rid);
+
+          $data['mode'] = $role['mode'];
+          $data['data'] = $role['data_wrapper']['data']['value'];
+          $data['filter_format'] = $role['data_wrapper']['data']['format'];
+
+          variable_set("front_page_role_{$rid}", $data);
           break;
         case 'redirect':
         case 'alias':
-          db_merge('front_page')
-              ->key(array('rid' => $rid))
-              ->fields(array(
-                'mode' => $role['mode'],
-                'data' => $role['path'],
-                'filter_format' => '',
-              ))
-              ->execute();
+          $data = _front_page_get_by_rid_with_default($rid);
+
+          $data['mode'] = $role['mode'];
+          $data['data'] = $role['path'];
+          $data['filter_format'] = '';
+
+          variable_set("front_page_role_{$rid}", $data);
           break;
         default:
-          db_merge('front_page')
-              ->key(array('rid' => $rid))
-              ->fields(array(
-                'mode' => '',
-                'data' => '',
-                'filter_format' => '',
-              ))
-              ->execute();
+          $data = _front_page_get_by_rid_with_default($rid);
+
+          $data['mode'] = '';
+          $data['data'] = '';
+          $data['filter_format'] = '';
+
+          variable_set("front_page_role_{$rid}", $data);
           break;
       }
     }
@@ -261,23 +257,21 @@ function front_page_admin_arrange_form_submit($form, &$form_state) {
   $front_page_data = front_page_get_all();
   foreach ($form_state['values']['roles'] as $rid => $role) {
     if (isset($role['mode']) && !$role['mode'] || !isset($front_page_data[$rid])) {
-      db_merge('front_page')
-          ->key(array('rid' => $rid))
-          ->fields(array(
-            'mode' => '',
-            'data' => '',
-            'filter_format' => '',
-            'weight' => $role['weight'],
-          ))
-          ->execute();
+      $data = _front_page_get_by_rid_with_default($rid);
+
+      $data['mode'] = '';
+      $data['data'] = '';
+      $data['filter_format'] = '';
+      $data['weight'] = $role['weight'];
+
+      variable_set("front_page_role_{$rid}", $data);
     }
     else {
-      db_merge('front_page')
-          ->key(array('rid' => $rid))
-          ->fields(array(
-            'weight' => $role['weight'],
-          ))
-          ->execute();
+      $data = _front_page_get_by_rid_with_default($rid);
+
+      $data['weight'] = $role['weight'];
+
+      variable_set("front_page_role_{$rid}", $data);
     }
   }
 }
@@ -286,7 +280,6 @@ function front_page_admin_arrange_form_submit($form, &$form_state) {
  * Form for setting the <front> placeholder to another path.
  */
 function front_page_admin_home_links($form, &$form_state) {
-
   $form['front_page_home_link_path'] = array(
     '#type' => 'textfield',
     '#title' => t('Redirect your site HOME links to'),
