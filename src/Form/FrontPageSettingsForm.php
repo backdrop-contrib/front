@@ -62,7 +62,7 @@ class FrontPageSettingsForm extends ConfigFormBase {
       $form['roles'][$rid] = [
         '#type' => 'details',
         '#open' => FALSE,
-        '#title' => $this->t('Front Page for !rolename', ['!rolename' => $role->label()]),
+        '#title' => $this->t('Front Page for @rolename', ['@rolename' => $role->label()]),
       ];
 
       $form['roles'][$rid]['enabled'] = [
