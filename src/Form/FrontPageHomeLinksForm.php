@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\front_page\Form\FrontPageHomeLinksForm.
- */
-
 namespace Drupal\front_page\Form;
 
 use Drupal\Core\Form\ConfigFormBase;

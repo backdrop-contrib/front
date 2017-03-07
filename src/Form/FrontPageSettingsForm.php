@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\front_page\Form\FrontPageSettingsForm.
- */
-
 namespace Drupal\front_page\Form;
 
 use Drupal\Core\Database\Database;
