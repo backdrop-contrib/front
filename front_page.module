@@ -27,7 +27,7 @@ function front_page_help($route_name, \Drupal\Core\Routing\RouteMatchInterface $
     case 'front_page.settings':
       return t('<p>Setup custom front pages for your site.</p>');
 
-    case 'front_page.home_links':
+    case 'help.page.front_page':
       return t('<p>If a HOME link is set, the &lt;front&gt; placeholder will be replaced with this value instead of the standard front page.</p>');
   }
 }
