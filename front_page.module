@@ -38,7 +38,7 @@ function front_page_help($route_name, \Drupal\Core\Routing\RouteMatchInterface $
  */
 function front_page_parse_url($path) {
   $url['path'] = $path;
-  $url['options'] = array();
+  $url['options'] = [];
   if (preg_match('@^(?P<path>[^?#]+)(\?(?P<query>[^#]*))?(#(?P<fragment>.*))?$@', $path, $match)) {
     $url['path'] = $match['path'];
     if (!empty($match['query'])) {
@@ -102,12 +102,12 @@ function front_page_get_all() {
  * Implements hook_theme().
  */
 function front_page_theme() {
-  return array(
-    'front_page_admin_arrange_form' => array(
+  return [
+    'front_page_admin_arrange_form' => [
       'render element' => 'form',
       'function' => 'theme_front_page_admin_arrange_form',
-    ),
-  );
+    ],
+  ];
 }
 
 /**
@@ -131,50 +131,50 @@ function theme_front_page_admin_arrange_form($variables) {
   $form = $variables['form'];
 
   // Enable the drag handles.
-  drupal_attach_tabledrag($form['roles'], array(
+  drupal_attach_tabledrag($form['roles'], [
     'table_id' => 'front-page-arrange',
     'action' => 'order',
     'relationship' => 'sibling',
     'group' => 'front-page-weight',
-  ));
+  ]);
 
-  $header = array(
+  $header = [
     t('Role'),
     t('Mode'),
     t('Preview'),
     t('Enabled'),
     t('Weight'),
-  );
+  ];
 
-  $rows = array();
+  $rows = [];
   $renderer = \Drupal::service('renderer');
   foreach (Element::children($form['roles']) as $rid) {
     $element = &$form['roles'][$rid];
 
     // Add special classes to be used for tabledrag.js.
-    $element['weight']['#attributes']['class'] = array('front-page-weight');
+    $element['weight']['#attributes']['class'] = ['front-page-weight'];
 
-    $row = array();
+    $row = [];
     $row[] = $renderer->render($element['title'], FALSE);
     $row[] = $renderer->render($element['mode'], FALSE);
     $row[] = $renderer->render($element['preview'], FALSE);
     $row[] = $renderer->render($element['enabled'], FALSE);
     $row[] = $renderer->render($element['weight'], FALSE);
 
-    $row = array_merge(array('data' => $row), $element['#attributes']);
+    $row = array_merge(['data' => $row], $element['#attributes']);
     $row['class'][] = 'draggable';
     $rows[] = $row;
   }
   $output = '';
   if (empty($rows)) {
-    $rows[] = array(array('data' => 'no roles', 'colspan' => '5'));
+    $rows[] = [['data' => 'no roles', 'colspan' => '5']];
   }
 
   $front_page_arrange = [
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $rows,
-    'attributes' => array('id' => 'front-page-arrange'),
+    'attributes' => ['id' => 'front-page-arrange'],
   ];
   $output .= $renderer->render($front_page_arrange);
   $output .= drupal_render_children($form);

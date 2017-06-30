@@ -59,7 +59,7 @@ class FrontPageSubscriber implements EventSubscriberInterface {
    * {@inheritdoc}
    */
   static function getSubscribedEvents() {
-    $events[KernelEvents::REQUEST][] = array('initData');
+    $events[KernelEvents::REQUEST][] = ['initData'];
     return $events;
   }
 }
