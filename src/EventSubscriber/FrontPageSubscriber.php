@@ -2,6 +2,7 @@
 
 namespace Drupal\front_page\EventSubscriber;
 
+use Drupal\Core\Url;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
@@ -62,7 +63,9 @@ class FrontPageSubscriber implements EventSubscriberInterface {
     }
 
     if ($front_page) {
-      $event->setResponse(new RedirectResponse($front_page));
+      $current_language = \Drupal::languageManager()->getCurrentLanguage();
+      $url = Url::fromUserInput($front_page, ['language' => $current_language]);
+      $event->setResponse(new RedirectResponse($url->toString()));
 
       // @todo Probably we must to remove this and manage cache by role.
       // Turn caching off for this page as it is dependant on role.
