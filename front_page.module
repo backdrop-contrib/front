@@ -7,22 +7,18 @@
  * This version is for Drupal 8.
  * Earlier versions can be found at http://drupal.org/project/front.
  *
- * This module version was developed by timhilliard and various members
- * of the drupal community.
- *
  * If you have any ideas/patches or requests,
  * please post them at http://drupal.org/project/issues/front.
  */
 
 use Drupal\Core\Database\Database;
 use Drupal\Core\Render\Element;
-use \Drupal\Core\Link;
-use \Drupal\Core\Url;
+use Drupal\Core\Routing\RouteMatchInterface;
 
 /**
  * Implements hook_help().
  */
-function front_page_help($route_name, \Drupal\Core\Routing\RouteMatchInterface $route_match) {
+function front_page_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
     case 'front_page.settings':
       return t('<p>Setup custom front pages for your site.</p>');
@@ -33,6 +29,8 @@ function front_page_help($route_name, \Drupal\Core\Routing\RouteMatchInterface $
 }
 
 /**
+ * Parse URL including GET and fragment.
+ *
  * Function to parse a full URL including GET variables and fragment
  * to an array ready for drupal_goto(), url(), or l() functions.
  */
@@ -126,6 +124,11 @@ function front_page_user_role_delete($role) {
  * @param array $variables
  *   An associative array containing:
  *   - form: A render element representing the form.
+ *
+ * @return string
+ *   Rendered admin form.
+ *
+ * @todo Refactor this function, it's a legacy way.
  */
 function theme_front_page_admin_arrange_form($variables) {
   $form = $variables['form'];
@@ -178,5 +181,6 @@ function theme_front_page_admin_arrange_form($variables) {
   ];
   $output .= $renderer->render($front_page_arrange);
   $output .= drupal_render_children($form);
+
   return $output;
 }

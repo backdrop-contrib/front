@@ -6,6 +6,11 @@ use Drupal\Core\PathProcessor\OutboundPathProcessorInterface;
 use Drupal\Core\Render\BubbleableMetadata;
 use Symfony\Component\HttpFoundation\Request;
 
+/**
+ * Class FrontPagePathProcessor.
+ *
+ * @package Drupal\front_page
+ */
 class FrontPagePathProcessor implements OutboundPathProcessorInterface {
 
   /**
@@ -15,7 +20,8 @@ class FrontPagePathProcessor implements OutboundPathProcessorInterface {
     if ($path == '/main') {
       $path = '';
     }
-    $config  = \Drupal::config('front_page.settings');
+
+    $config = \Drupal::config('front_page.settings');
     $new_path = $config->get('home_link_path', '');
     if (($path === '/<front>' || empty($path)) && !empty($new_path)) {
       $path = '/' . $new_path;
@@ -24,4 +30,3 @@ class FrontPagePathProcessor implements OutboundPathProcessorInterface {
   }
 
 }
-?>
