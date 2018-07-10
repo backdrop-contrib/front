@@ -56,7 +56,7 @@ class FrontPageSubscriber implements EventSubscriberInterface {
 
           // $base_path can contain a / at the end, strip to avoid double slash.
           $path = rtrim($base_path, '/');
-          $front_page = $path . $role_config['path'];
+          $front_page = $role_config['path'];
           $current_weigth = $role_config['weigth'];
         }
       }

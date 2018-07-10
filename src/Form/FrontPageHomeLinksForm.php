@@ -39,7 +39,7 @@ class FrontPageHomeLinksForm extends ConfigFormBase {
       '#cols' => 20,
       '#rows' => 1,
       '#description' => $this->t('Specify where the user should be redirected to. An example would be <em>/node/12</em>. Leave blank when you\'re not using HOME redirect.'),
-      '#field_prefix' => $base_url . base_path(),
+      '#field_prefix' => $base_url,
     ];
 
     return parent::buildForm($form, $form_state);
