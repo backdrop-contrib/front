@@ -98,7 +98,7 @@ class FrontPageSettingsForm extends ConfigFormBase {
     $rolesList = $form_state->getUserInput()['roles'];
     if ($rolesList) {
       foreach ($rolesList as $rid => $role) {
-        if ($role['enabled'] && empty($role['path'])) {
+        if (!empty($role['enabled']) && empty($role['path'])) {
           $form_state->setErrorByName('roles][' . $rid . '][path', $this->t('You must set the path field for redirect mode.'));
         }
       }
