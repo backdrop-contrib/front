@@ -127,6 +127,9 @@ function front_page_init() {
   }
 
   if ($_front_page) {
+    // Let other hooks modify
+    drupal_alter('front_page', $_front_page);
+
     switch ($_front_page['mode']) {
       case 'themed':
       case 'full':
