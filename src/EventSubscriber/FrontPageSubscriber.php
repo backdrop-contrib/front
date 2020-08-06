@@ -44,7 +44,6 @@ class FrontPageSubscriber implements EventSubscriberInterface {
     $isFrontPage = \Drupal::service('path.matcher')->isFrontPage();
     if (\Drupal::config('front_page.settings')->get('enable', '') && $isFrontPage) {
 
-
       $roles = \Drupal::currentUser()->getRoles();
       $config = \Drupal::configFactory()->get('front_page.settings');
       $current_weigth = NULL;
@@ -76,8 +75,9 @@ class FrontPageSubscriber implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  static function getSubscribedEvents() {
+  public static function getSubscribedEvents() {
     $events[KernelEvents::REQUEST][] = ['initData'];
     return $events;
   }
+
 }

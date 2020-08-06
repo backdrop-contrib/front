@@ -2,10 +2,8 @@
 
 namespace Drupal\front_page\Form;
 
-use Drupal\Core\Database\Database;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Url;
 
 /**
  * Configure site information settings for this site.
@@ -37,7 +35,7 @@ class FrontPageSettingsForm extends ConfigFormBase {
       '#type' => 'checkbox',
       '#title' => $this->t('Front Page Override'),
       '#description' => $this->t('Enable this if you want the front page module to manage the home page.'),
-      '#default_value' => $config->get('enable') ?: false,
+      '#default_value' => $config->get('enable') ?: FALSE,
     ];
 
     // Load any existing settings and build the by redirect by role form.
@@ -63,7 +61,7 @@ class FrontPageSettingsForm extends ConfigFormBase {
       $form['roles'][$rid]['enabled'] = [
         '#type' => 'checkbox',
         '#title' => $this->t('Enable'),
-        '#value' => isset($role_config['enabled']) ? $role_config['enabled'] : false,
+        '#value' => isset($role_config['enabled']) ? $role_config['enabled'] : FALSE,
       ];
 
       $form['roles'][$rid]['weigth'] = [
@@ -94,7 +92,7 @@ class FrontPageSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-//    parent::validateForm($form, $form_state);
+    // parent::validateForm($form, $form_state);.
     $rolesList = $form_state->getUserInput()['roles'];
     if ($rolesList) {
       foreach ($rolesList as $rid => $role) {
@@ -111,12 +109,12 @@ class FrontPageSettingsForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $config = \Drupal::configFactory()->getEditable('front_page.settings');
 
-    //Set if all config are enabled or not.
+    // Set if all config are enabled or not.
     $config->set('enable', $form_state->getValue('front_page_enable'));
 
-    //Set config by role.
+    // Set config by role.
     $rolesList = $form_state->getUserInput()['roles'];
-     if (is_array($rolesList)) {
+    if (is_array($rolesList)) {
       foreach ($rolesList as $rid => $role) {
         $config->set('rid_' . $rid, $role);
       }
@@ -125,4 +123,5 @@ class FrontPageSettingsForm extends ConfigFormBase {
     $config->save();
     parent::submitForm($form, $form_state);
   }
+
 }

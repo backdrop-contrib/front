@@ -4,7 +4,6 @@ namespace Drupal\front_page\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Url;
 
 /**
  * Configure site information settings for this site.
@@ -38,7 +37,7 @@ class FrontPageHomeLinksForm extends ConfigFormBase {
       '#default_value' => $config->get('home_link_path'),
       '#cols' => 20,
       '#rows' => 1,
-      '#description' => $this->t('Specify where the user should be redirected to. An example would be <em>/node/12</em>. Leave blank when you\'re not using HOME redirect.'),
+      '#description' => $this->t("Specify where the user should be redirected to. An example would be <em>/node/12</em>. Leave blank when you're not using HOME redirect."),
       '#field_prefix' => $base_url,
     ];
 
@@ -54,4 +53,5 @@ class FrontPageHomeLinksForm extends ConfigFormBase {
       ->save();
     parent::submitForm($form, $form_state);
   }
+
 }
