@@ -180,7 +180,10 @@ function theme_front_page_admin_arrange_form($variables) {
     'attributes' => ['id' => 'front-page-arrange'],
   ];
   $output .= $renderer->render($front_page_arrange);
-  $output .= drupal_render_children($form);
-
+  foreach (Element::children($form) as $key) {
+    if (!empty($form[$key])) {
+      $output .= \Drupal::service('renderer')->render($form[$key]);
+    }
+  }
   return $output;
 }

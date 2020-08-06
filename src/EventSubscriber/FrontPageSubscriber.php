@@ -7,6 +7,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use \Drupal\Core\Installer\InstallerKernel;
 
 /**
  * Class FrontPageSubscriber.
@@ -26,7 +27,7 @@ class FrontPageSubscriber implements EventSubscriberInterface {
 
     // Make sure front page module is not run when using cli (drush).
     // Make sure front page module does not run when installing Drupal either.
-    if (PHP_SAPI === 'cli' || drupal_installation_attempted()) {
+    if (PHP_SAPI === 'cli' || InstallerKernel::installationAttempted()) {
       return;
     }
 
