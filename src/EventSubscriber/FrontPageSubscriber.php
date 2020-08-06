@@ -23,7 +23,6 @@ class FrontPageSubscriber implements EventSubscriberInterface {
    *   Managed event.
    */
   public function initData(GetResponseEvent $event) {
-    global $base_path;
 
     // Make sure front page module is not run when using cli (drush).
     // Make sure front page module does not run when installing Drupal either.
@@ -55,7 +54,6 @@ class FrontPageSubscriber implements EventSubscriberInterface {
           && (($role_config['weigth'] < $current_weigth) || $current_weigth === NULL)) {
 
           // $base_path can contain a / at the end, strip to avoid double slash.
-          $path = rtrim($base_path, '/');
           $front_page = $role_config['path'];
           $current_weigth = $role_config['weigth'];
         }
@@ -63,6 +61,11 @@ class FrontPageSubscriber implements EventSubscriberInterface {
     }
 
     if ($front_page) {
+
+      // Add '/' to the beginning of url if url not begin with with a '/', '?', or '#'.
+      if (strpos($front_page, '/') !== 0 && strpos($front_page, '#') !== 0 && strpos($front_page, '?') !== 0) {
+        $front_page = "/{$front_page}";
+      }
       $current_language = \Drupal::languageManager()->getCurrentLanguage();
       $url = Url::fromUserInput($front_page, ['language' => $current_language]);
       $event->setResponse(new RedirectResponse($url->toString()));
