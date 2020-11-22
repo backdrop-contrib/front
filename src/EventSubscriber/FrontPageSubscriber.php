@@ -47,7 +47,7 @@ class FrontPageSubscriber implements EventSubscriberInterface {
 
       $roles = \Drupal::currentUser()->getRoles();
       $config = \Drupal::configFactory()->get('front_page.settings');
-      $current_weigth = NULL;
+      $current_weight = NULL;
 
       /** @var \Drupal\user\Entity\User $user */
       $user = User::load(\Drupal::currentUser()->id());
@@ -58,11 +58,11 @@ class FrontPageSubscriber implements EventSubscriberInterface {
       foreach ($roles as $role) {
         $role_config = $config->get('rid_' . $role);
         if ((isset($role_config['enabled']) && $role_config['enabled'] == TRUE)
-          && (($role_config['weigth'] < $current_weigth) || $current_weigth === NULL)) {
+          && (($role_config['weight'] < $current_weight) || $current_weight === NULL)) {
 
           // $base_path can contain a / at the end, strip to avoid double slash.
           $front_page = $role_config['path'];
-          $current_weigth = $role_config['weigth'];
+          $current_weight = $role_config['weight'];
         }
       }
     }

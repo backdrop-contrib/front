@@ -71,10 +71,10 @@ class FrontPageSettingsForm extends ConfigFormBase {
         '#value' => isset($role_config['enabled']) ? $role_config['enabled'] : FALSE,
       ];
 
-      $form['roles'][$rid]['weigth'] = [
+      $form['roles'][$rid]['weight'] = [
         '#type' => 'number',
-        '#title' => $this->t('Weigth'),
-        '#value' => isset($role_config['weigth']) ? $role_config['weigth'] : 0,
+        '#title' => $this->t('weight'),
+        '#value' => isset($role_config['weight']) ? $role_config['weight'] : 0,
       ];
 
       $form['roles'][$rid]['path'] = [
