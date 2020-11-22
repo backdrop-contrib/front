@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\front_page\EventSubscriber;
+namespace Drupal\front\EventSubscriber;
 
 use Drupal\Core\Url;
 use Drupal\user\Entity\User;
@@ -13,7 +13,7 @@ use \Drupal\Core\Installer\InstallerKernel;
 /**
  * Class FrontPageSubscriber.
  *
- * @package Drupal\front_page\EventSubscriber
+ * @package Drupal\front\EventSubscriber
  */
 class FrontPageSubscriber implements EventSubscriberInterface {
 
@@ -41,12 +41,12 @@ class FrontPageSubscriber implements EventSubscriberInterface {
       return;
     }
 
-    $front_page = NULL;
+    $front = NULL;
     $isFrontPage = \Drupal::service('path.matcher')->isFrontPage();
-    if (\Drupal::config('front_page.settings')->get('enable', '') && $isFrontPage) {
+    if (\Drupal::config('front.settings')->get('enable', '') && $isFrontPage) {
 
       $roles = \Drupal::currentUser()->getRoles();
-      $config = \Drupal::configFactory()->get('front_page.settings');
+      $config = \Drupal::configFactory()->get('front.settings');
       $current_weight = NULL;
 
       /** @var \Drupal\user\Entity\User $user */
@@ -61,20 +61,20 @@ class FrontPageSubscriber implements EventSubscriberInterface {
           && (($role_config['weight'] < $current_weight) || $current_weight === NULL)) {
 
           // $base_path can contain a / at the end, strip to avoid double slash.
-          $front_page = $role_config['path'];
+          $front = $role_config['path'];
           $current_weight = $role_config['weight'];
         }
       }
     }
 
-    if ($front_page) {
+    if ($front) {
 
       // Add '/' to the beginning of url if url not begin with with a '/', '?', or '#'.
-      if (strpos($front_page, '/') !== 0 && strpos($front_page, '#') !== 0 && strpos($front_page, '?') !== 0) {
-        $front_page = "/{$front_page}";
+      if (strpos($front, '/') !== 0 && strpos($front, '#') !== 0 && strpos($front, '?') !== 0) {
+        $front = "/{$front}";
       }
       $current_language = \Drupal::languageManager()->getCurrentLanguage();
-      $url = Url::fromUserInput($front_page, ['language' => $current_language]);
+      $url = Url::fromUserInput($front, ['language' => $current_language]);
       $event->setResponse(new RedirectResponse($url->toString()));
 
       // @todo Probably we must to remove this and manage cache by role.

@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\front_page\Form;
+namespace Drupal\front\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -14,7 +14,7 @@ class FrontPageHomeLinksForm extends ConfigFormBase {
    * Implements \Drupal\Core\Form\FormInterface::getFormID().
    */
   public function getFormID() {
-    return 'front_page_admin_home_links';
+    return 'front_admin_home_links';
   }
 
   /**
@@ -30,8 +30,8 @@ class FrontPageHomeLinksForm extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     global $base_url;
 
-    $config = $this->config('front_page.settings');
-    $form['front_page_home_link_path'] = [
+    $config = $this->config('front.settings');
+    $form['front_home_link_path'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Redirect your site HOME links to'),
       '#default_value' => $config->get('home_link_path'),
@@ -48,8 +48,8 @@ class FrontPageHomeLinksForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $this->configFactory()->getEditable('front_page.settings')
-      ->set('home_link_path', $form_state->getValue('front_page_home_link_path'))
+    $this->configFactory()->getEditable('front.settings')
+      ->set('home_link_path', $form_state->getValue('front_home_link_path'))
       ->save();
     parent::submitForm($form, $form_state);
   }

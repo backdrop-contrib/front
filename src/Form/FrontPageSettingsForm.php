@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\front_page\Form;
+namespace Drupal\front\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -14,7 +14,7 @@ class FrontPageSettingsForm extends ConfigFormBase {
    * Implements \Drupal\Core\Form\FormInterface::getFormID().
    */
   public function getFormID() {
-    return 'front_page_admin';
+    return 'front_admin';
   }
 
   /**
@@ -29,9 +29,9 @@ class FrontPageSettingsForm extends ConfigFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
 
-    $config = \Drupal::configFactory()->get('front_page.settings');
+    $config = \Drupal::configFactory()->get('front.settings');
 
-    $form['front_page_enable'] = [
+    $form['front_enable'] = [
       '#type' => 'checkbox',
       '#title' => $this->t('Front Page Override'),
       '#description' => $this->t('Enable this if you want the front page module to manage the home page.'),
@@ -114,10 +114,10 @@ class FrontPageSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $config = \Drupal::configFactory()->getEditable('front_page.settings');
+    $config = \Drupal::configFactory()->getEditable('front.settings');
 
     // Set if all config are enabled or not.
-    $config->set('enable', $form_state->getValue('front_page_enable'));
+    $config->set('enable', $form_state->getValue('front_enable'));
     $config->set('disable_for_admin', $form_state->getValue('disable_for_admin'));
 
     // Set config by role.
