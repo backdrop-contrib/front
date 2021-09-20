@@ -1,10 +1,32 @@
 {
-  "name": "front/front",
-  "type": "drupal-module",
+  "name": "drupal/front",
   "description": "Provides configurable front page",
-  "homepage": "http://drupal.org/project/front",
-  "license": "GPL-2.0+",
-  "require": {
-    "drupal/core": "~8.1"
+  "keywords": [],
+  "type": "drupal-module",
+  "homepage": "https://www.drupal.org/project/front",
+  "names": [
+      "drupal/front"
+  ],
+  "versions": [
+      "1.x-dev",
+      "dev-1.x"
+  ],
+  "licenses": [
+      {
+          "name": "GNU General Public License v2.0 or later",
+          "osi": "GPL-2.0-or-later",
+          "url": "https://spdx.org/licenses/GPL-2.0-or-later.html#licenseText"
+      }
+  ],
+  "source": {
+      "type": "git",
+      "url": "https://git.drupalcode.org/project/front.git",
+      "reference": "47dd2dd844ceacbe3076aed9d6eb4f2c5088cad4"
+  },
+  "support": {
+      "source": "https://git.drupalcode.org/project/front"
+  },
+  "requires": {
+      "drupal/core": "^8.8 || ^9.0"
   }
 }
