@@ -1,8 +1,9 @@
 <?php
 
-namespace Drupal\front_page\EventSubscriber;
+namespace Drupal\front\EventSubscriber;
 
 use Drupal\Core\Url;
+use Drupal\user\Entity\User;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
@@ -12,7 +13,7 @@ use \Drupal\Core\Installer\InstallerKernel;
 /**
  * Class FrontPageSubscriber.
  *
- * @package Drupal\front_page\EventSubscriber
+ * @package Drupal\front\EventSubscriber
  */
 class FrontPageSubscriber implements EventSubscriberInterface {
 
@@ -23,7 +24,6 @@ class FrontPageSubscriber implements EventSubscriberInterface {
    *   Managed event.
    */
   public function initData(GetResponseEvent $event) {
-    global $base_path;
 
     // Make sure front page module is not run when using cli (drush).
     // Make sure front page module does not run when installing Drupal either.
@@ -41,31 +41,40 @@ class FrontPageSubscriber implements EventSubscriberInterface {
       return;
     }
 
-    $front_page = NULL;
+    $front = NULL;
     $isFrontPage = \Drupal::service('path.matcher')->isFrontPage();
-    if (\Drupal::config('front_page.settings')->get('enable', '') && $isFrontPage) {
-
+    if (\Drupal::config('front.settings')->get('enable', '') && $isFrontPage) {
 
       $roles = \Drupal::currentUser()->getRoles();
-      $config = \Drupal::configFactory()->get('front_page.settings');
-      $current_weigth = NULL;
+      $config = \Drupal::configFactory()->get('front.settings');
+      $current_weight = NULL;
+
+      /** @var \Drupal\user\Entity\User $user */
+      $user = User::load(\Drupal::currentUser()->id());
+      if ($user->hasRole('administrator') && $config->get('disable_for_admin')) {
+        return;
+      }
 
       foreach ($roles as $role) {
         $role_config = $config->get('rid_' . $role);
         if ((isset($role_config['enabled']) && $role_config['enabled'] == TRUE)
-          && (($role_config['weigth'] < $current_weigth) || $current_weigth === NULL)) {
+          && (($role_config['weight'] < $current_weight) || $current_weight === NULL)) {
 
           // $base_path can contain a / at the end, strip to avoid double slash.
-          $path = rtrim($base_path, '/');
-          $front_page = $role_config['path'];
-          $current_weigth = $role_config['weigth'];
+          $front = $role_config['path'];
+          $current_weight = $role_config['weight'];
         }
       }
     }
 
-    if ($front_page) {
+    if ($front) {
+
+      // Add '/' to the beginning of url if url not begin with with a '/', '?', or '#'.
+      if (strpos($front, '/') !== 0 && strpos($front, '#') !== 0 && strpos($front, '?') !== 0) {
+        $front = "/{$front}";
+      }
       $current_language = \Drupal::languageManager()->getCurrentLanguage();
-      $url = Url::fromUserInput($front_page, ['language' => $current_language]);
+      $url = Url::fromUserInput($front, ['language' => $current_language]);
       $event->setResponse(new RedirectResponse($url->toString()));
 
       // @todo Probably we must to remove this and manage cache by role.
@@ -77,8 +86,9 @@ class FrontPageSubscriber implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  static function getSubscribedEvents() {
+  public static function getSubscribedEvents() {
     $events[KernelEvents::REQUEST][] = ['initData'];
     return $events;
   }
+
 }

@@ -18,12 +18,12 @@ use Drupal\Core\Routing\RouteMatchInterface;
 /**
  * Implements hook_help().
  */
-function front_page_help($route_name, RouteMatchInterface $route_match) {
+function front_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
-    case 'front_page.settings':
+    case 'front.settings':
       return t('<p>Setup custom front pages for your site.</p>');
 
-    case 'help.page.front_page':
+    case 'help.page.front':
       return t('<p>If a HOME link is set, the &lt;front&gt; placeholder will be replaced with this value instead of the standard front page.</p>');
   }
 }
@@ -34,7 +34,7 @@ function front_page_help($route_name, RouteMatchInterface $route_match) {
  * Function to parse a full URL including GET variables and fragment
  * to an array ready for drupal_goto(), url(), or l() functions.
  */
-function front_page_parse_url($path) {
+function front_parse_url($path) {
   $url['path'] = $path;
   $url['options'] = [];
   if (preg_match('@^(?P<path>[^?#]+)(\?(?P<query>[^#]*))?(#(?P<fragment>.*))?$@', $path, $match)) {
@@ -55,9 +55,9 @@ function front_page_parse_url($path) {
 /**
  * Function to return the first role enabled in front page, ordered by weight.
  */
-function front_page_get_by_role($index = 0, $number = 1) {
+function front_get_by_role($index = 0, $number = 1) {
   $roles = \Drupal::currentUser()->getRoles();
-  $result = Database::getConnection()->select('front_page', 'fp')
+  $result = Database::getConnection()->select('front', 'fp')
     ->fields('fp')
     ->condition('rid', $roles, 'IN')
     ->condition('mode', '', '<>')
@@ -72,9 +72,9 @@ function front_page_get_by_role($index = 0, $number = 1) {
 /**
  * Function to return the first role enabled in front page, ordered by weight.
  */
-function front_page_get_by_rid($rid) {
+function front_get_by_rid($rid) {
 
-  $result = Database::getConnection()->select('front_page', 'fp')
+  $result = Database::getConnection()->select('front', 'fp')
     ->fields('fp')
     ->condition('rid', $rid)
     ->condition('mode', '', '<>')
@@ -86,8 +86,8 @@ function front_page_get_by_rid($rid) {
 /**
  * Function to return all the roles in front page, ordered by weight.
  */
-function front_page_get_all() {
-  $result = Database::getConnection()->select('front_page', 'fp')
+function front_get_all() {
+  $result = Database::getConnection()->select('front', 'fp')
     ->fields('fp')
     ->orderBy('weight', 'ASC')
     ->orderBy('rid', 'DESC')
@@ -99,11 +99,11 @@ function front_page_get_all() {
 /**
  * Implements hook_theme().
  */
-function front_page_theme() {
+function front_theme() {
   return [
-    'front_page_admin_arrange_form' => [
+    'front_admin_arrange_form' => [
       'render element' => 'form',
-      'function' => 'theme_front_page_admin_arrange_form',
+      'function' => 'theme_front_admin_arrange_form',
     ],
   ];
 }
@@ -111,9 +111,9 @@ function front_page_theme() {
 /**
  * Implements hook_user_role_delete().
  */
-function front_page_user_role_delete($role) {
+function front_user_role_delete($role) {
   // Delete Front configuration for the role being deleted.
-  Database::getConnection()->delete('front_page')
+  Database::getConnection()->delete('front')
     ->condition('rid', $role->rid)
     ->execute();
 }
@@ -130,7 +130,7 @@ function front_page_user_role_delete($role) {
  *
  * @todo Refactor this function, it's a legacy way.
  */
-function theme_front_page_admin_arrange_form($variables) {
+function theme_front_admin_arrange_form($variables) {
   $form = $variables['form'];
 
   // Enable the drag handles.
@@ -173,13 +173,13 @@ function theme_front_page_admin_arrange_form($variables) {
     $rows[] = [['data' => 'no roles', 'colspan' => '5']];
   }
 
-  $front_page_arrange = [
+  $front_arrange = [
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $rows,
     'attributes' => ['id' => 'front-page-arrange'],
   ];
-  $output .= $renderer->render($front_page_arrange);
+  $output .= $renderer->render($front_arrange);
   foreach (Element::children($form) as $key) {
     if (!empty($form[$key])) {
       $output .= \Drupal::service('renderer')->render($form[$key]);
