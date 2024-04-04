@@ -1,0 +1,26 @@
+front_page.settings:
+  type: config_object
+  label: Front page settings
+  mapping:
+    enabled:
+      type: boolean
+      label: Front page override enabled
+    roles:
+      type: sequence
+      label: Overrides per role
+      sequence:
+        - type: front_page.settings.role
+
+front_page.settings.role:
+  type: mapping
+  label: Role overrides
+  mapping:
+    enabled:
+      type: boolean
+      label: Enabled
+    weight:
+      type: integer
+      label: Weight
+    path:
+      type: string
+      label: Redirect path

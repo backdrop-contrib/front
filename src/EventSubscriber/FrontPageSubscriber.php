@@ -7,7 +7,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use \Drupal\Core\Installer\InstallerKernel;
+use Drupal\Core\Installer\InstallerKernel;
 
 /**
  * Class FrontPageSubscriber.
@@ -43,22 +43,22 @@ class FrontPageSubscriber implements EventSubscriberInterface {
 
     $front_page = NULL;
     $isFrontPage = \Drupal::service('path.matcher')->isFrontPage();
-    if (\Drupal::config('front_page.settings')->get('enable', '') && $isFrontPage) {
+    if (\Drupal::config('front_page.settings')->get('enabled', '') && $isFrontPage) {
 
 
       $roles = \Drupal::currentUser()->getRoles();
       $config = \Drupal::configFactory()->get('front_page.settings');
-      $current_weigth = NULL;
+      $current_weight = NULL;
 
       foreach ($roles as $role) {
-        $role_config = $config->get('rid_' . $role);
+        $role_config = $config->get('roles.' . $role);
         if ((isset($role_config['enabled']) && $role_config['enabled'] == TRUE)
-          && (($role_config['weigth'] < $current_weigth) || $current_weigth === NULL)) {
+          && (($role_config['weight'] < $current_weight) || $current_weight === NULL)) {
 
           // $base_path can contain a / at the end, strip to avoid double slash.
           $path = rtrim($base_path, '/');
           $front_page = $role_config['path'];
-          $current_weigth = $role_config['weigth'];
+          $current_weight = $role_config['weight'];
         }
       }
     }

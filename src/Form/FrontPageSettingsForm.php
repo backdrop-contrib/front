@@ -13,9 +13,9 @@ use Drupal\Core\Url;
 class FrontPageSettingsForm extends ConfigFormBase {
 
   /**
-   * Implements \Drupal\Core\Form\FormInterface::getFormID().
+   * Implements \Drupal\Core\Form\FormInterface::getFormId().
    */
-  public function getFormID() {
+  public function getFormId() {
     return 'front_page_admin';
   }
 
@@ -37,7 +37,7 @@ class FrontPageSettingsForm extends ConfigFormBase {
       '#type' => 'checkbox',
       '#title' => $this->t('Front Page Override'),
       '#description' => $this->t('Enable this if you want the front page module to manage the home page.'),
-      '#default_value' => $config->get('enable') ?: false,
+      '#default_value' => $config->get('enabled') ?: FALSE,
     ];
 
     // Load any existing settings and build the by redirect by role form.
@@ -53,7 +53,7 @@ class FrontPageSettingsForm extends ConfigFormBase {
     // Iterate each role.
     foreach ($roles as $rid => $role) {
 
-      $role_config = $config->get('rid_' . $rid);
+      $role_config = $config->get('roles.' . $rid);
       $form['roles'][$rid] = [
         '#type' => 'details',
         '#open' => FALSE,
@@ -63,13 +63,13 @@ class FrontPageSettingsForm extends ConfigFormBase {
       $form['roles'][$rid]['enabled'] = [
         '#type' => 'checkbox',
         '#title' => $this->t('Enable'),
-        '#value' => isset($role_config['enabled']) ? $role_config['enabled'] : false,
+        '#default_value' => isset($role_config['enabled']) ? $role_config['enabled'] : FALSE,
       ];
 
-      $form['roles'][$rid]['weigth'] = [
+      $form['roles'][$rid]['weight'] = [
         '#type' => 'number',
         '#title' => $this->t('Weigth'),
-        '#value' => isset($role_config['weigth']) ? $role_config['weigth'] : 0,
+        '#default_value' => isset($role_config['weight']) ? $role_config['weight'] : 0,
       ];
 
       $form['roles'][$rid]['path'] = [
@@ -111,14 +111,14 @@ class FrontPageSettingsForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $config = \Drupal::configFactory()->getEditable('front_page.settings');
 
-    //Set if all config are enabled or not.
-    $config->set('enable', $form_state->getValue('front_page_enable'));
+    // Set if all config are enabled or not.
+    $config->set('enabled', $form_state->getValue('front_page_enable'));
 
     //Set config by role.
     $rolesList = $form_state->getUserInput()['roles'];
      if (is_array($rolesList)) {
       foreach ($rolesList as $rid => $role) {
-        $config->set('rid_' . $rid, $role);
+        $config->set('roles.' . $rid, $role);
       }
     }
 
