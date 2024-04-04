@@ -65,7 +65,8 @@ class FrontPageSubscriber implements EventSubscriberInterface {
 
     if ($front_page) {
       $current_language = \Drupal::languageManager()->getCurrentLanguage();
-      $url = Url::fromUserInput($front_page, ['language' => $current_language]);
+      $request = clone $event->getRequest();
+      $url = Url::fromUserInput($front_page, ['language' => $current_language, 'query' => $request->query->all()]);
       $event->setResponse(new RedirectResponse($url->toString()));
 
       // @todo Probably we must to remove this and manage cache by role.
