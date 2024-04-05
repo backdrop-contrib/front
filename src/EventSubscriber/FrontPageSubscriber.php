@@ -5,6 +5,7 @@ namespace Drupal\front_page\EventSubscriber;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Config\ImmutableConfig;
 use Drupal\Core\Installer\InstallerKernel;
+use Drupal\Core\PageCache\ResponsePolicy\KillSwitch;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\Core\Url;
@@ -43,6 +44,13 @@ class FrontPageSubscriber implements EventSubscriberInterface {
   protected $currentUser;
 
   /**
+   * KillSwitch.
+   *
+   * @var \Drupal\Core\PageCache\ResponsePolicy\KillSwitch
+   */
+  protected $pageCacheKillSwitch;
+
+  /**
    * Constructs the Event Subscriber object.
    *
    * @param \Drupal\Core\State\StateInterface $state
@@ -51,11 +59,14 @@ class FrontPageSubscriber implements EventSubscriberInterface {
    *   The config factory service.
    * @param \Drupal\Core\Session\AccountInterface $current_user
    *   The current user.
+   * @param \Drupal\Core\PageCache\ResponsePolicy\KillSwitch $pageCacheKillSwitch
+   *   The page cache kill switch.
    */
-  public function __construct(StateInterface $state, ConfigFactoryInterface $config, AccountInterface $current_user) {
+  public function __construct(StateInterface $state, ConfigFactoryInterface $config, AccountInterface $current_user, KillSwitch $pageCacheKillSwitch) {
     $this->state = $state;
     $this->config = $config->get('front_page.settings');
     $this->currentUser = $current_user;
+    $this->pageCacheKillSwitch = $pageCacheKillSwitch;
   }
 
   /**
@@ -118,7 +129,7 @@ class FrontPageSubscriber implements EventSubscriberInterface {
 
       // @todo Probably we must to remove this and manage cache by role.
       // Turn caching off for this page as it is dependant on role.
-      \Drupal::service('page_cache_kill_switch')->trigger();
+      $this->pageCacheKillSwitch->trigger();
     }
   }
 

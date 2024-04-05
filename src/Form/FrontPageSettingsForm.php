@@ -74,7 +74,7 @@ class FrontPageSettingsForm extends ConfigFormBase {
 
       $form['roles'][$rid]['weight'] = [
         '#type' => 'number',
-        '#title' => $this->t('Weigth'),
+        '#title' => $this->t('Weight'),
         '#default_value' => $role_config['weight'] ?? 0,
       ];
 
