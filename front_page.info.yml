@@ -2,4 +2,4 @@ name: Front Page
 description: 'Allows site admins setup custom front pages for the site.'
 type: module
 configure: front_page.settings
-core_version_requirement: ^9 || ^10
+core_version_requirement: ^10
