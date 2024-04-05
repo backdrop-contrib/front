@@ -13,7 +13,7 @@ class FrontPageHomeLinksForm extends ConfigFormBase {
   /**
    * Implements \Drupal\Core\Form\FormInterface::getFormID().
    */
-  public function getFormID() {
+  public function getFormId() {
     return 'front_page_admin_home_links';
   }
 

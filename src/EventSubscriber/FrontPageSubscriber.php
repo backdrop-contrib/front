@@ -2,7 +2,11 @@
 
 namespace Drupal\front_page\EventSubscriber;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Config\ImmutableConfig;
 use Drupal\Core\Installer\InstallerKernel;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\State\StateInterface;
 use Drupal\Core\Url;
 use Drupal\user\Entity\User;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -11,11 +15,48 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
- * Class FrontPageSubscriber.
+ * Front page event subscriber for initData event.
  *
  * @package Drupal\front_page\EventSubscriber
  */
 class FrontPageSubscriber implements EventSubscriberInterface {
+
+  /**
+   * The state key value store.
+   *
+   * @var \Drupal\Core\State\StateInterface
+   */
+  protected $state;
+
+  /**
+   * An immutable config object.
+   *
+   * @var \Drupal\Core\Config\ImmutableConfig
+   */
+  private ImmutableConfig $config;
+
+  /**
+   * The current user.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
+  protected $currentUser;
+
+  /**
+   * Constructs the Event Subscriber object.
+   *
+   * @param \Drupal\Core\State\StateInterface $state
+   *   The state key value store.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config
+   *   The config factory service.
+   * @param \Drupal\Core\Session\AccountInterface $current_user
+   *   The current user.
+   */
+  public function __construct(StateInterface $state, ConfigFactoryInterface $config, AccountInterface $current_user) {
+    $this->state = $state;
+    $this->config = $config->get('front_page.settings');
+    $this->currentUser = $current_user;
+  }
 
   /**
    * Manage the logic.
@@ -33,7 +74,7 @@ class FrontPageSubscriber implements EventSubscriberInterface {
     }
 
     // Don't run when site is in maintenance mode.
-    if (\Drupal::state()->get('system.maintenance_mode')) {
+    if ($this->state->get('system.maintenance_mode')) {
       return;
     }
 
@@ -44,20 +85,19 @@ class FrontPageSubscriber implements EventSubscriberInterface {
 
     $front_page = NULL;
     $isFrontPage = \Drupal::service('path.matcher')->isFrontPage();
-    if (\Drupal::config('front_page.settings')->get('enabled', '') && $isFrontPage) {
+    if ($this->config->get('enabled', '') && $isFrontPage) {
 
-      $roles = \Drupal::currentUser()->getRoles();
-      $config = \Drupal::configFactory()->get('front_page.settings');
+      $roles = $this->currentUser->getRoles();
       $current_weight = NULL;
 
       /** @var \Drupal\user\Entity\User $user */
-      $user = User::load(\Drupal::currentUser()->id());
-      if ($user->hasRole('administrator') && $config->get('disable_for_administrators')) {
+      $user = User::load($this->currentUser->id());
+      if ($user->hasRole('administrator') && $this->config->get('disable_for_administrators')) {
         return;
       }
 
       foreach ($roles as $role) {
-        $role_config = $config->get('roles.' . $role);
+        $role_config = $this->config->get('roles.' . $role);
         if ((isset($role_config['enabled']) && $role_config['enabled'] == TRUE)
           && (($role_config['weight'] < $current_weight) || $current_weight === NULL)) {
 
