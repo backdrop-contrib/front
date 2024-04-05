@@ -5,11 +5,18 @@ front_page.settings:
     enabled:
       type: boolean
       label: Front page override enabled
+    disable_for_administrators:
+      type: boolean
+      label: Disable front page override for administrators
+    home_link_path:
+      type: path
+      label: The home link path
     roles:
       type: sequence
       label: Overrides per role
       sequence:
-        - type: front_page.settings.role
+        type: front_page.settings.role
+        label: Front page role
 
 front_page.settings.role:
   type: mapping
@@ -22,5 +29,5 @@ front_page.settings.role:
       type: integer
       label: Weight
     path:
-      type: string
+      type: path
       label: Redirect path
