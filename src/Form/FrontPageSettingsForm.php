@@ -11,7 +11,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Configure site information settings for this site.
  */
-class FrontPageSettingsForm extends ConfigFormBase {
+final class FrontPageSettingsForm extends ConfigFormBase {
 
   /**
    * The configuration factory.
@@ -39,7 +39,7 @@ class FrontPageSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static(
+    return new self(
       $container->get('config.factory'),
       $container->get('entity_type.manager')
     );
