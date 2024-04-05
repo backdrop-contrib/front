@@ -1,7 +1,7 @@
 services:
   front_page.event_subscriber:
     class: Drupal\front_page\EventSubscriber\FrontPageSubscriber
-    arguments: ['@state', '@config.factory', '@current_user']
+    arguments: ['@state', '@config.factory', '@current_user', '@page_cache_kill_switch']
     tags:
       - {name: event_subscriber}
 
