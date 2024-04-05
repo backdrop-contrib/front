@@ -4,6 +4,7 @@ namespace Drupal\front_page\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\user\Entity\Role;
 
 /**
  * Configure site information settings for this site.
@@ -33,7 +34,7 @@ class FrontPageSettingsForm extends ConfigFormBase {
 
     $form['front_page_enable'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Front Page Override'),
+      '#title' => $this->t('Enable Front page override'),
       '#description' => $this->t('Enable this if you want the front page module to manage the home page.'),
       '#default_value' => $config->get('enabled') ?: FALSE,
     ];
@@ -53,7 +54,7 @@ class FrontPageSettingsForm extends ConfigFormBase {
     ];
 
     // Build the form for roles.
-    $roles = user_roles();
+    $roles = Role::loadMultiple();
 
     // Iterate each role.
     foreach ($roles as $rid => $role) {
@@ -62,7 +63,7 @@ class FrontPageSettingsForm extends ConfigFormBase {
       $form['roles'][$rid] = [
         '#type' => 'details',
         '#open' => FALSE,
-        '#title' => $this->t('Front Page for @rolename', ['@rolename' => $role->label()]),
+        '#title' => $this->t('Front page for @rolename', ['@rolename' => $role->label()]),
       ];
 
       $form['roles'][$rid]['enabled'] = [
