@@ -132,7 +132,7 @@ class FrontPageSubscriber implements EventSubscriberInterface {
       $current_weight = NULL;
 
       /** @var \Drupal\user\Entity\User $user */
-      $user = $this->entityTypeManager()->getStorage('user')->load($this->currentUser->id());
+      $user = $this->entityTypeManager->getStorage('user')->load($this->currentUser->id());
       if ($user->hasRole('administrator') && $this->config->get('disable_for_administrators')) {
         return;
       }
