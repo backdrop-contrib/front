@@ -9,7 +9,7 @@ use Drupal\Core\Render\BubbleableMetadata;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Class FrontPagePathProcessor.
+ * Implements a path processor for managing front page paths in Drupal.
  *
  * @package Drupal\front_page
  */
