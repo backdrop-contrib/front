@@ -2,14 +2,58 @@
 
 namespace Drupal\front_page\Form;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\user\Entity\Role;
+use Drupal\Core\Path\PathValidatorInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Configure site information settings for this site.
  */
 class FrontPageSettingsForm extends ConfigFormBase {
+
+  /**
+   * The configuration factory.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected $configFactory;
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
+   * The path validator.
+   *
+   * @var \Drupal\Core\Path\PathValidatorInterface
+   */
+  protected $pathValidator;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager, PathValidatorInterface $path_validator) {
+    $this->configFactory = $config_factory;
+    $this->entityTypeManager = $entity_type_manager;
+    $this->pathValidator = $path_validator;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('config.factory'),
+      $container->get('entity_type.manager'),
+      $container->get('path.validator'),
+    );
+  }
 
   /**
    * Implements \Drupal\Core\Form\FormInterface::getFormId().
@@ -30,7 +74,7 @@ class FrontPageSettingsForm extends ConfigFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
 
-    $config = \Drupal::configFactory()->get('front_page.settings');
+    $config = $this->configFactory->get('front_page.settings');
 
     $form['front_page_enable'] = [
       '#type' => 'checkbox',
@@ -54,7 +98,7 @@ class FrontPageSettingsForm extends ConfigFormBase {
     ];
 
     // Build the form for roles.
-    $roles = Role::loadMultiple();
+    $roles = $this->entityTypeManager->getStorage('user_role')->loadMultiple();
 
     // Iterate each role.
     foreach ($roles as $rid => $role) {
@@ -107,6 +151,12 @@ class FrontPageSettingsForm extends ConfigFormBase {
         if (!empty($role['enabled']) && empty($role['path'])) {
           $form_state->setErrorByName('roles][' . $rid . '][path', $this->t('You must set the path field for redirect mode.'));
         }
+        if (!empty($role['enabled']) && ($value = $role['path']) && $value[0] !== '/') {
+          $form_state->setErrorByName('roles][' . $rid . '][path', $this->t("The path '%path' has to start with a slash.", ['%path' => $role['path']]));
+        }
+        if (!empty($role['enabled']) && !$this->pathValidator->isValid($role['path'])) {
+          $form_state->setErrorByName('roles][' . $rid . '][path', $this->t("Either the path '%path' is invalid or you do not have access to it.", ['%path' => $role['path']]));
+        }
       }
     }
   }
@@ -115,7 +165,7 @@ class FrontPageSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $config = \Drupal::configFactory()->getEditable('front_page.settings');
+    $config = $this->configFactory->getEditable('front_page.settings');
 
     // Set if all config are enabled or not.
     $config->set('enabled', $form_state->getValue('front_page_enable'));
