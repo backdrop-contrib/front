@@ -74,7 +74,7 @@ class FrontPageHomeLinksForm extends ConfigFormBase {
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
     // Validate path.
-    if (($value = $form_state->getValue('front_page_home_link_path')) && $value[0] !== '/') {
+    if (($value = $form_state->getValue('front_page_home_link_path')) && !str_starts_with($value, "/")) {
       $form_state->setErrorByName('front_page_home_link_path', $this->t("The path '%path' has to start with a slash.", ['%path' => $form_state->getValue('front_page_home_link_path')]));
     }
     if (!$this->pathValidator->isValid($form_state->getValue('front_page_home_link_path'))) {

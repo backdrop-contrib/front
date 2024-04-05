@@ -151,7 +151,7 @@ class FrontPageSettingsForm extends ConfigFormBase {
         if (!empty($role['enabled']) && empty($role['path'])) {
           $form_state->setErrorByName('roles][' . $rid . '][path', $this->t('You must set the path field for redirect mode.'));
         }
-        if (!empty($role['enabled']) && ($value = $role['path']) && $value[0] !== '/') {
+        if (!empty($role['enabled']) && ($value = $role['path']) && !str_starts_with($value, "/")) {
           $form_state->setErrorByName('roles][' . $rid . '][path', $this->t("The path '%path' has to start with a slash.", ['%path' => $role['path']]));
         }
         if (!empty($role['enabled']) && !$this->pathValidator->isValid($role['path'])) {
