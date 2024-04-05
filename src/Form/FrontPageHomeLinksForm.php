@@ -4,7 +4,6 @@ namespace Drupal\front_page\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Url;
 
 /**
  * Configure site information settings for this site.
@@ -54,4 +53,5 @@ class FrontPageHomeLinksForm extends ConfigFormBase {
       ->save();
     parent::submitForm($form, $form_state);
   }
+
 }

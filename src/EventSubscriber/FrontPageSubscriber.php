@@ -2,13 +2,13 @@
 
 namespace Drupal\front_page\EventSubscriber;
 
+use Drupal\Core\Installer\InstallerKernel;
 use Drupal\Core\Url;
 use Drupal\user\Entity\User;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Drupal\Core\Installer\InstallerKernel;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
  * Class FrontPageSubscriber.
@@ -46,7 +46,6 @@ class FrontPageSubscriber implements EventSubscriberInterface {
     $isFrontPage = \Drupal::service('path.matcher')->isFrontPage();
     if (\Drupal::config('front_page.settings')->get('enabled', '') && $isFrontPage) {
 
-
       $roles = \Drupal::currentUser()->getRoles();
       $config = \Drupal::configFactory()->get('front_page.settings');
       $current_weight = NULL;
@@ -72,7 +71,7 @@ class FrontPageSubscriber implements EventSubscriberInterface {
 
     if ($front_page) {
       $current_language = \Drupal::languageManager()->getCurrentLanguage();
-      $request = clone $event->getRequest();
+      $request = $event->getRequest();
       $url = Url::fromUserInput($front_page, ['language' => $current_language, 'query' => $request->query->all()]);
       $event->setResponse(new RedirectResponse($url->toString()));
 
@@ -85,8 +84,9 @@ class FrontPageSubscriber implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  static function getSubscribedEvents() {
+  public static function getSubscribedEvents() {
     $events[KernelEvents::REQUEST][] = ['initData'];
     return $events;
   }
+
 }

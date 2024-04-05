@@ -11,8 +11,6 @@
  * please post them at http://drupal.org/project/issues/front.
  */
 
-use Drupal\Core\Database\Database;
-use Drupal\Core\Render\Element;
 use Drupal\Core\Routing\RouteMatchInterface;
 
 /**
@@ -41,7 +39,7 @@ function front_page_parse_url($path) {
     $url['path'] = $match['path'];
     if (!empty($match['query'])) {
       foreach (explode('&', $match['query']) as $query_part) {
-        list($key, $value) = explode('=', $query_part);
+        [$key, $value] = explode('=', $query_part);
         $url['options']['query'][$key] = $value;
       }
     }
