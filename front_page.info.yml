@@ -1,5 +1,5 @@
 name: Front Page
-description: 'Allows site admins setup custom front pages for the site.'
+description: 'Allows role based custom front page configuration.'
 type: module
 configure: front_page.settings
 core_version_requirement: ^10

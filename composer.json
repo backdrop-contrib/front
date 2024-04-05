@@ -1,7 +1,7 @@
 {
   "name": "front/front",
   "type": "drupal-module",
-  "description": "Provides configurable front page",
+  "description": "Allows role based custom front page configuration.",
   "homepage": "http://drupal.org/project/front",
   "license": "GPL-2.0+"
 }
