@@ -6,7 +6,7 @@ use Drupal\Core\Url;
 use Drupal\user\Entity\User;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Drupal\Core\Installer\InstallerKernel;
 
@@ -20,10 +20,10 @@ class FrontPageSubscriber implements EventSubscriberInterface {
   /**
    * Manage the logic.
    *
-   * @param \Symfony\Component\HttpKernel\Event\GetResponseEvent $event
+   * @param \Symfony\Component\HttpKernel\Event\RequestEvent $event
    *   Managed event.
    */
-  public function initData(GetResponseEvent $event) {
+  public function initData(RequestEvent $event) {
     global $base_path;
 
     // Make sure front page module is not run when using cli (drush).
@@ -72,7 +72,8 @@ class FrontPageSubscriber implements EventSubscriberInterface {
 
     if ($front_page) {
       $current_language = \Drupal::languageManager()->getCurrentLanguage();
-      $url = Url::fromUserInput($front_page, ['language' => $current_language]);
+      $request = clone $event->getRequest();
+      $url = Url::fromUserInput($front_page, ['language' => $current_language, 'query' => $request->query->all()]);
       $event->setResponse(new RedirectResponse($url->toString()));
 
       // @todo Probably we must to remove this and manage cache by role.
