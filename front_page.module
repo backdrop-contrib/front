@@ -27,34 +27,11 @@ function front_page_help($route_name, RouteMatchInterface $route_match) {
 }
 
 /**
- * Parse URL including GET and fragment.
- *
- * Function to parse a full URL including GET variables and fragment
- * to an array ready for drupal_goto(), url(), or l() functions.
- */
-function front_page_parse_url($path) {
-  $url['path'] = $path;
-  $url['options'] = [];
-  if (preg_match('@^(?P<path>[^?#]+)(\?(?P<query>[^#]*))?(#(?P<fragment>.*))?$@', $path, $match)) {
-    $url['path'] = $match['path'];
-    if (!empty($match['query'])) {
-      foreach (explode('&', $match['query']) as $query_part) {
-        [$key, $value] = explode('=', $query_part);
-        $url['options']['query'][$key] = $value;
-      }
-    }
-    if (!empty($match['fragment'])) {
-      $url['options']['fragment'] = $match['fragment'];
-    }
-  }
-  return $url;
-}
-
-/**
  * Implements hook_user_role_delete().
  */
 function front_page_user_role_delete($role) {
   // Delete Front configuration for the role being deleted.
   $config = \Drupal::configFactory()->getEditable('front_page.settings');
-  $config->get('rid_' . $role->id());
+  $config->clear('rid_' . $role->id());
+  $config->save();
 }
