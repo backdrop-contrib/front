@@ -3,6 +3,7 @@
 namespace Drupal\front_page\EventSubscriber;
 
 use Drupal\Core\Url;
+use Drupal\user\Entity\User;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
@@ -49,6 +50,12 @@ class FrontPageSubscriber implements EventSubscriberInterface {
       $roles = \Drupal::currentUser()->getRoles();
       $config = \Drupal::configFactory()->get('front_page.settings');
       $current_weight = NULL;
+
+      /** @var \Drupal\user\Entity\User $user */
+      $user = User::load(\Drupal::currentUser()->id());
+      if ($user->hasRole('administrator') && $config->get('disable_for_administrators')) {
+        return;
+      }
 
       foreach ($roles as $role) {
         $role_config = $config->get('roles.' . $role);

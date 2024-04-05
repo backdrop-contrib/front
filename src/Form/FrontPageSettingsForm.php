@@ -40,6 +40,13 @@ class FrontPageSettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('enabled') ?: FALSE,
     ];
 
+    $form['disable_for_administrators'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Disable front page redirects for the administrator role.'),
+      '#description' => $this->t('If checked, admin users will never be redirected, even if the authenticated user role has a redirect enabled.'),
+      '#default_value' => $config->get('disable_for_administrators') ?: FALSE,
+    ];
+
     // Load any existing settings and build the by redirect by role form.
     $form['roles'] = [
       '#tree' => TRUE,
@@ -113,6 +120,7 @@ class FrontPageSettingsForm extends ConfigFormBase {
 
     // Set if all config are enabled or not.
     $config->set('enabled', $form_state->getValue('front_page_enable'));
+    $config->set('disable_for_administrators', $form_state->getValue('disable_for_administrators'));
 
     //Set config by role.
     $rolesList = $form_state->getUserInput()['roles'];
