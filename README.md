@@ -1,6 +1,12 @@
-# Front Page Module
+# Front Page
 
-This module is designed for Drupal 10+ websites, providing users with the ability to set a custom front page tailored to different roles. It offers functionalities like specifying a custom front page based on role type using 301 Redirects and overriding home links to direct users to another local path, which can be useful for preventing users from returning to a splash screen.
+The Front Page module is designed for Drupal 10+ websites, providing users with the ability to set a custom front page tailored to different roles. It offers functionalities like specifying a custom front page based on role type using 301 Redirects and overriding home links to direct users to another local path, which can be useful for preventing users from returning to a splash screen.
+
+For a full description of the module, visit the
+[project page](https://www.drupal.org/project/front).
+
+Submit bug reports and feature suggestions, or track changes in the
+[issue queue](https://www.drupal.org/project/issues/front).
 
 
 ## Requirements
@@ -12,11 +18,6 @@ No special requirements.
 
 - Download the Front Page module from [Drupal.org](https://www.drupal.org/project/front).
 - Upload and install the Front Page module in your Drupal 8 instance.
-
-
-## Issue Tracking
-
-For any bugs, feature requests, or support inquiries, please visit the [Front Page issue queue](http://drupal.org/project/issues/front) on Drupal.org.
 
 
 ## Configuration
@@ -32,12 +33,10 @@ For any bugs, feature requests, or support inquiries, please visit the [Front Pa
 
 ## MAINTAINERS
 
-Current maintainers:
-
-- Julian Pustkuchen : [Anybody](https://www.drupal.org/u/anybody)
-- Gus : [Dublin Drupaller](https://www.drupal.org/u/dublin-drupaller)
-- Tim Hilliard : [timhilliard](https://www.drupal.org/u/timhilliard)
-- Samuel Solís : [estoyausente](https://www.drupal.org/u/estoyausente)
-- Joshua Sedler : [Grevil](https://www.drupal.org/u/grevil)
-- Oleksandr Senenko : [Oleksandr Senenko](https://www.drupal.org/u/oleksandr-senenko)
-- Simon Georges : [Simon Georges](https://www.drupal.org/u/simon-georges)
+- Julian Pustkuchen - [Anybody](https://www.drupal.org/u/anybody)
+- Gus - [Dublin Drupaller](https://www.drupal.org/u/dublin-drupaller)
+- Tim Hilliard - [timhilliard](https://www.drupal.org/u/timhilliard)
+- Samuel Solís - [estoyausente](https://www.drupal.org/u/estoyausente)
+- Joshua Sedler - [Grevil](https://www.drupal.org/u/grevil)
+- Oleksandr Senenko - [Oleksandr Senenko](https://www.drupal.org/u/oleksandr-senenko)
+- Simon Georges - [Simon Georges](https://www.drupal.org/u/simon-georges)
