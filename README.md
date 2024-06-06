@@ -6,11 +6,11 @@ functionalities like specifying a custom front page based on role type using
 301 Redirects and overriding home links to direct users to another local path,
 which can be useful for preventing users from returning to a splash screen.
 
-1. For a full description of the module, visit the
-   [project page](https://www.drupal.org/project/front).
+For a full description of the module, visit the
+[project page](https://www.drupal.org/project/front).
 
-2. Submit bug reports and feature suggestions, or track changes in the
-   [issue queue](https://www.drupal.org/project/issues/front).
+Submit bug reports and feature suggestions, or track changes in the
+[issue queue](https://www.drupal.org/project/issues/front).
 
 
 ## Requirements
@@ -20,22 +20,22 @@ No special requirements.
 
 ## Installation
 
-- Download the Front Page module from [Drupal.org](https://www.drupal.org/project/front).
-- Upload and install the Front Page module in your Drupal 8 instance.
+Install as you would normally install a contributed Drupal module. For further
+information, see
+[Installing Drupal Modules](https://www.drupal.org/docs/extending-drupal/installing-drupal-modules).
 
 
 ## Configuration
 
-1. Install the module.
-2. Navigate to `Administer -> Config -> Front Page` in your Drupal admin panel.
-3. Expand the sections corresponding to the roles for which you want to
+1. Navigate to `Administer -> Config -> Front Page` in your Drupal admin panel.
+2. Expand the sections corresponding to the roles for which you want to
    customize the front page.
-4. Select the appropriate method of override and fill in the necessary variables 
+3. Select the appropriate method of override and fill in the necessary variables
    for that method.
-5. Once the settings are configured correctly, save the form.
-6. Enable the 'Front Page Override' checkbox and save the form again to apply
+4. Once the settings are configured correctly, save the form.
+5. Enable the 'Front Page Override' checkbox and save the form again to apply
    the changes. The Front Page module should now be functioning as expected.
-7. That's it!
+6. That's it!
 
 
 ## MAINTAINERS
