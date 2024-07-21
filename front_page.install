@@ -22,9 +22,11 @@ function front_page_update_8101() {
       $role = substr($key, strlen('rid_'));
       $role_config = $config->get($key);
 
+      /* cSpell:disable */
       // Fix wrong spelling.
       $role_config['weight'] = $role_config['weigth'];
       unset($role_config['weigth']);
+      /* cSpell:enable */
 
       $config->set("roles.{$role}", $role_config);
       $config->clear($key);
