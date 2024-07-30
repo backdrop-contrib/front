@@ -2,14 +2,78 @@
 
 namespace Drupal\front_page\Form;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\user\Entity\Role;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\token\Token;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Configure site information settings for this site.
  */
 class FrontPageSettingsForm extends ConfigFormBase {
+
+  /**
+   * The token service.
+   *
+   * @var \Drupal\token\Token
+   */
+  protected $tokenService;
+
+  /**
+   * The config factory service.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected $configFactory;
+
+  /**
+   * The current user.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
+  protected $currentUser;
+
+  /**
+   * The entity type manager service.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
+   * The module handler service.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function __construct(Token $token_service, ConfigFactoryInterface $config_factory, AccountInterface $current_user, EntityTypeManagerInterface $entity_type_manager, ModuleHandlerInterface $module_handler) {
+    $this->tokenService = $token_service;
+    $this->configFactory = $config_factory;
+    $this->currentUser = $current_user;
+    $this->entityTypeManager = $entity_type_manager;
+    $this->moduleHandler = $module_handler;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('token'),
+      $container->get('config.factory'),
+      $container->get('current_user'),
+      $container->get('entity_type.manager'),
+      $container->get('module_handler')
+    );
+  }
 
   /**
    * Implements \Drupal\Core\Form\FormInterface::getFormId().
@@ -30,7 +94,7 @@ class FrontPageSettingsForm extends ConfigFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
 
-    $config = \Drupal::configFactory()->get('front_page.settings');
+    $config = $this->configFactory->get('front_page.settings');
 
     $form['front_page_enable'] = [
       '#type' => 'checkbox',
@@ -54,7 +118,7 @@ class FrontPageSettingsForm extends ConfigFormBase {
     ];
 
     // Build the form for roles.
-    $roles = Role::loadMultiple();
+    $roles = $this->entityTypeManager->getStorage('user_role')->loadMultiple();
 
     // Iterate each role.
     foreach ($roles as $rid => $role) {
@@ -84,8 +148,21 @@ class FrontPageSettingsForm extends ConfigFormBase {
         '#default_value' => $role_config['path'] ?? '',
         '#cols' => 20,
         '#rows' => 1,
-        '#description' => $this->t('A redirect path can contain a full URL including get parameters and fragment string (eg "/node/51?page=5#anchor").'),
+        '#description' => $this->t('A redirect path can contain a full URL including get parameters and fragment string (eg "/node/51?page=5#anchor"). Use tokens like [node:title].'),
+        '#element_validate' => ['token_element_validate'],
       ];
+
+      // Add the token tree help.
+      if ($this->moduleHandler->moduleExists('token')) {
+        $form['roles'][$rid]['token_help'] = [
+          '#theme' => 'token_tree_link',
+          '#token_types' => ['all'],
+          '#show_restricted' => TRUE,
+          '#global_types' => TRUE,
+          '#click_insert' => TRUE,
+          '#weight' => 90,
+        ];
+      }
     }
 
     $form['submit'] = [
@@ -100,7 +177,6 @@ class FrontPageSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    // parent::validateForm($form, $form_state);.
     $rolesList = $form_state->getUserInput()['roles'];
     if ($rolesList) {
       foreach ($rolesList as $rid => $role) {
@@ -115,7 +191,7 @@ class FrontPageSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $config = \Drupal::configFactory()->getEditable('front_page.settings');
+    $config = $this->configFactory->getEditable('front_page.settings');
 
     // Set if all config are enabled or not.
     $config->set('enabled', $form_state->getValue('front_page_enable'));
@@ -125,12 +201,25 @@ class FrontPageSettingsForm extends ConfigFormBase {
     $rolesList = $form_state->getUserInput()['roles'];
     if (is_array($rolesList)) {
       foreach ($rolesList as $rid => $role) {
+        // Replace tokens in the path.
+        if ($this->moduleHandler->moduleExists('token')) {
+          $role['path'] = $this->replaceTokens($role['path']);
+        }
         $config->set('roles.' . $rid, $role);
       }
     }
 
     $config->save();
     parent::submitForm($form, $form_state);
+  }
+
+  /**
+   * Helper function to replace tokens.
+   */
+  protected function replaceTokens($text) {
+    $data = ['user' => $this->currentUser];
+    $options = ['clear' => TRUE];
+    return $this->tokenService->replace($text, $data, $options);
   }
 
 }
