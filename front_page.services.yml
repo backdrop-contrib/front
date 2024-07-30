@@ -10,3 +10,9 @@ services:
     arguments: ['@config.factory']
     tags:
       - {name: path_processor_outbound}
+
+  front_page.form:
+      class: Drupal\front_page\Form\FrontPageSettingsForm
+      arguments: ['@token']
+      tags:
+        - { name: form, id: front_page_admin }
