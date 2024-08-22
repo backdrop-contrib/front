@@ -2,4 +2,4 @@ name: Front Page
 description: 'Allows role based custom front page configuration.'
 type: module
 configure: front_page.settings
-core_version_requirement: ^10
+core_version_requirement: ^10 || ^11
