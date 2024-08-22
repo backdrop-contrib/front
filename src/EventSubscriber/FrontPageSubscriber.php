@@ -4,12 +4,14 @@ namespace Drupal\front_page\EventSubscriber;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Config\ImmutableConfig;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Installer\InstallerKernel;
+use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\PageCache\ResponsePolicy\KillSwitch;
+use Drupal\Core\Path\PathMatcherInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\Core\Url;
-use Drupal\user\Entity\User;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -51,6 +53,27 @@ class FrontPageSubscriber implements EventSubscriberInterface {
   protected $pageCacheKillSwitch;
 
   /**
+   * The path matcher.
+   *
+   * @var \Drupal\Core\Path\PathMatcherInterface
+   */
+  protected $pathMatcher;
+
+  /**
+   * Language manager.
+   *
+   * @var \Drupal\Core\Language\LanguageManagerInterface
+   */
+  protected $languageManager;
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * Constructs the Event Subscriber object.
    *
    * @param \Drupal\Core\State\StateInterface $state
@@ -61,12 +84,21 @@ class FrontPageSubscriber implements EventSubscriberInterface {
    *   The current user.
    * @param \Drupal\Core\PageCache\ResponsePolicy\KillSwitch $pageCacheKillSwitch
    *   The page cache kill switch.
+   * @param \Drupal\Core\Path\PathMatcherInterface $path_matcher
+   *   The path matcher.
+   * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
+   *   The language manager.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
    */
-  public function __construct(StateInterface $state, ConfigFactoryInterface $config, AccountInterface $current_user, KillSwitch $pageCacheKillSwitch) {
+  public function __construct(StateInterface $state, ConfigFactoryInterface $config, AccountInterface $current_user, KillSwitch $pageCacheKillSwitch, PathMatcherInterface $path_matcher, LanguageManagerInterface $language_manager, EntityTypeManagerInterface $entity_type_manager) {
     $this->state = $state;
     $this->config = $config->get('front_page.settings');
     $this->currentUser = $current_user;
     $this->pageCacheKillSwitch = $pageCacheKillSwitch;
+    $this->pathMatcher = $path_matcher;
+    $this->languageManager = $language_manager;
+    $this->entityTypeManager = $entity_type_manager;
   }
 
   /**
@@ -93,14 +125,14 @@ class FrontPageSubscriber implements EventSubscriberInterface {
     }
 
     $front_page = NULL;
-    $isFrontPage = \Drupal::service('path.matcher')->isFrontPage();
+    $isFrontPage = $this->pathMatcher->isFrontPage();
     if ($this->config->get('enabled', '') && $isFrontPage) {
 
       $roles = $this->currentUser->getRoles();
       $current_weight = NULL;
 
       /** @var \Drupal\user\Entity\User $user */
-      $user = User::load($this->currentUser->id());
+      $user = $this->entityTypeManager->getStorage('user')->load($this->currentUser->id());
       if ($user->hasRole('administrator') && $this->config->get('disable_for_administrators')) {
         return;
       }
@@ -118,11 +150,12 @@ class FrontPageSubscriber implements EventSubscriberInterface {
     }
 
     if ($front_page) {
-      // Add '/' to the beginning of url if url not begin with with a '/', '?', or '#'.
+      // Add '/' to the beginning of url if url not begin with with a '/', '?',
+      // or '#'.
       if (!str_starts_with($front_page, '/') && !str_starts_with($front_page, '#') && !str_starts_with($front_page, '?')) {
         $front_page = '/' . $front_page;
       }
-      $current_language = \Drupal::languageManager()->getCurrentLanguage();
+      $current_language = $this->languageManager->getCurrentLanguage();
       $request = $event->getRequest();
       $url = Url::fromUserInput($front_page, ['language' => $current_language, 'query' => $request->query->all()]);
       $event->setResponse(new RedirectResponse($url->toString()));

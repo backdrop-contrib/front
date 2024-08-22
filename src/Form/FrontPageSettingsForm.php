@@ -2,14 +2,48 @@
 
 namespace Drupal\front_page\Form;
 
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\user\Entity\Role;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Configure site information settings for this site.
  */
-class FrontPageSettingsForm extends ConfigFormBase {
+final class FrontPageSettingsForm extends ConfigFormBase {
+
+  /**
+   * The configuration factory.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected $configFactory;
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function __construct(ConfigFactoryInterface $config_factory, EntityTypeManagerInterface $entity_type_manager) {
+    $this->configFactory = $config_factory;
+    $this->entityTypeManager = $entity_type_manager;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new self(
+      $container->get('config.factory'),
+      $container->get('entity_type.manager')
+    );
+  }
 
   /**
    * Implements \Drupal\Core\Form\FormInterface::getFormId().
@@ -30,7 +64,7 @@ class FrontPageSettingsForm extends ConfigFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
 
-    $config = \Drupal::configFactory()->get('front_page.settings');
+    $config = $this->configFactory->get('front_page.settings');
 
     $form['front_page_enable'] = [
       '#type' => 'checkbox',
@@ -54,7 +88,7 @@ class FrontPageSettingsForm extends ConfigFormBase {
     ];
 
     // Build the form for roles.
-    $roles = Role::loadMultiple();
+    $roles = $this->entityTypeManager->getStorage('user_role')->loadMultiple();
 
     // Iterate each role.
     foreach ($roles as $rid => $role) {
@@ -63,7 +97,7 @@ class FrontPageSettingsForm extends ConfigFormBase {
       $form['roles'][$rid] = [
         '#type' => 'details',
         '#open' => FALSE,
-        '#title' => $this->t('Front page for @rolename', ['@rolename' => $role->label()]),
+        '#title' => $this->t('Front page for @role_name', ['@role_name' => $role->label()]),
       ];
 
       $form['roles'][$rid]['enabled'] = [
@@ -115,7 +149,7 @@ class FrontPageSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $config = \Drupal::configFactory()->getEditable('front_page.settings');
+    $config = $this->configFactory->getEditable('front_page.settings');
 
     // Set if all config are enabled or not.
     $config->set('enabled', $form_state->getValue('front_page_enable'));
