@@ -32,7 +32,7 @@ class FrontPageSettingsFormTest extends BrowserTestBase {
   }
 
   /**
-   * Tests that the disable_for_administrators checkbox is not saved as TRUE when hidden.
+   * Tests disable_for_administrators checkbox is not saved as TRUE when hidden.
    */
   public function testDisableForAdministratorsHidden() {
 
@@ -50,7 +50,7 @@ class FrontPageSettingsFormTest extends BrowserTestBase {
     ];
     $this->submitForm($edit, 'Save Settings');
 
-    // Verify that the 'disable_for_administrators' setting is not saved as TRUE.
+    // Verify 'disable_for_administrators' setting is not saved as TRUE.
     $config = $this->config('front_page.settings');
     $this->assertFalse($config->get('disable_for_administrators'), 'The disable_for_administrators setting should not be TRUE when hidden.');
   }
