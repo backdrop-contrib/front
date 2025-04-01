@@ -118,7 +118,7 @@ class FrontPageSubscriber implements EventSubscriberInterface {
     }
 
     if ($front_page) {
-      // Add '/' to the beginning of url if url not begin with with a '/', '?', or '#'.
+      // Add '/' to the beginning of the URL if it doesn't start with '/', '?', or '#'.
       if (!str_starts_with($front_page, '/') && !str_starts_with($front_page, '#') && !str_starts_with($front_page, '?')) {
         $front_page = '/' . $front_page;
       }

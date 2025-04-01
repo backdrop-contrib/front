@@ -9,7 +9,7 @@ use Drupal\Core\Render\BubbleableMetadata;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Class FrontPagePathProcessor.
+ * Processes outbound paths to add custom logic for front page redirects.
  *
  * @package Drupal\front_page
  */
