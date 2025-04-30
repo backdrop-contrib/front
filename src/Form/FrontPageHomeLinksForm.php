@@ -4,11 +4,36 @@ namespace Drupal\front_page\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Path\PathValidatorInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Configure site information settings for this site.
  */
 class FrontPageHomeLinksForm extends ConfigFormBase {
+
+  /**
+   * The path validator.
+   *
+   * @var \Drupal\Core\Path\PathValidatorInterface
+   */
+  protected $pathValidator;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function __construct(PathValidatorInterface $path_validator) {
+    $this->pathValidator = $path_validator;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('path.validator'),
+    );
+  }
 
   /**
    * Implements \Drupal\Core\Form\FormInterface::getFormID().
@@ -42,6 +67,19 @@ class FrontPageHomeLinksForm extends ConfigFormBase {
     ];
 
     return parent::buildForm($form, $form_state);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function validateForm(array &$form, FormStateInterface $form_state) {
+    // Validate path.
+    if (($value = $form_state->getValue('front_page_home_link_path')) && !str_starts_with($value, "/")) {
+      $form_state->setErrorByName('front_page_home_link_path', $this->t("The path '%path' has to start with a slash.", ['%path' => $form_state->getValue('front_page_home_link_path')]));
+    }
+    if (!$this->pathValidator->isValid($form_state->getValue('front_page_home_link_path'))) {
+      $form_state->setErrorByName('front_page_home_link_path', $this->t("Either the path '%path' is invalid or you do not have access to it.", ['%path' => $form_state->getValue('front_page_home_link_path')]));
+    }
   }
 
   /**
