@@ -9,7 +9,7 @@ use Drupal\Core\Render\BubbleableMetadata;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * Class FrontPagePathProcessor.
+ * Processes outbound paths to add custom logic for front page redirects.
  *
  * @package Drupal\front_page
  */
@@ -35,7 +35,7 @@ class FrontPagePathProcessor implements OutboundPathProcessorInterface {
   /**
    * {@inheritdoc}
    */
-  public function processOutbound($path, &$options = [], Request $request = NULL, BubbleableMetadata $bubbleable_metadata = NULL) {
+  public function processOutbound($path, &$options = [], ?Request $request = NULL, ?BubbleableMetadata $bubbleable_metadata = NULL) {
     if ($path == '/main') {
       $path = '';
     }

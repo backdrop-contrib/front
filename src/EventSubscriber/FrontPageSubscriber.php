@@ -6,6 +6,8 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Config\ImmutableConfig;
 use Drupal\Core\Installer\InstallerKernel;
 use Drupal\Core\PageCache\ResponsePolicy\KillSwitch;
+use Drupal\Core\Path\PathMatcherInterface;
+use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\State\StateInterface;
 use Drupal\Core\Url;
@@ -44,11 +46,25 @@ class FrontPageSubscriber implements EventSubscriberInterface {
   protected $currentUser;
 
   /**
+   * The language manager service.
+   *
+   * @var \Drupal\Core\Language\LanguageManagerInterface
+   */
+  protected $languageManager;
+
+  /**
    * KillSwitch.
    *
    * @var \Drupal\Core\PageCache\ResponsePolicy\KillSwitch
    */
   protected $pageCacheKillSwitch;
+
+  /**
+   * The path matcher service.
+   *
+   * @var \Drupal\Core\Path\PathMatcherInterface
+   */
+  protected $pathMatcher;
 
   /**
    * Constructs the Event Subscriber object.
@@ -61,12 +77,18 @@ class FrontPageSubscriber implements EventSubscriberInterface {
    *   The current user.
    * @param \Drupal\Core\PageCache\ResponsePolicy\KillSwitch $pageCacheKillSwitch
    *   The page cache kill switch.
+   * @param \Drupal\Core\Path\PathMatcherInterface $path_matcher
+   *   The path matcher service.
+   * @param \Drupal\Core\Language\LanguageManagerInterface $language_manager
+   *   The language manager service.
    */
-  public function __construct(StateInterface $state, ConfigFactoryInterface $config, AccountInterface $current_user, KillSwitch $pageCacheKillSwitch) {
+  public function __construct(StateInterface $state, ConfigFactoryInterface $config, AccountInterface $current_user, KillSwitch $pageCacheKillSwitch, PathMatcherInterface $path_matcher, LanguageManagerInterface $language_manager) {
     $this->state = $state;
     $this->config = $config->get('front_page.settings');
     $this->currentUser = $current_user;
     $this->pageCacheKillSwitch = $pageCacheKillSwitch;
+    $this->pathMatcher = $path_matcher;
+    $this->languageManager = $language_manager;
   }
 
   /**
@@ -93,7 +115,7 @@ class FrontPageSubscriber implements EventSubscriberInterface {
     }
 
     $front_page = NULL;
-    $isFrontPage = \Drupal::service('path.matcher')->isFrontPage();
+    $isFrontPage = $this->pathMatcher->isFrontPage();
     if ($this->config->get('enabled', '') && $isFrontPage) {
 
       $roles = $this->currentUser->getRoles();
@@ -118,11 +140,12 @@ class FrontPageSubscriber implements EventSubscriberInterface {
     }
 
     if ($front_page) {
-      // Add '/' to the beginning of url if url not begin with with a '/', '?', or '#'.
+      // Add '/' to the beginning of the URL.
+      // This applies if it doesn't start with '/', '?', or '#'.
       if (!str_starts_with($front_page, '/') && !str_starts_with($front_page, '#') && !str_starts_with($front_page, '?')) {
         $front_page = '/' . $front_page;
       }
-      $current_language = \Drupal::languageManager()->getCurrentLanguage();
+      $current_language = $this->languageManager->getCurrentLanguage();
       $request = $event->getRequest();
       $url = Url::fromUserInput($front_page, ['language' => $current_language, 'query' => $request->query->all()]);
       $event->setResponse(new RedirectResponse($url->toString()));
