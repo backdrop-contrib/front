@@ -179,14 +179,10 @@ class FrontPageSettingsForm extends ConfigFormBase {
     $rolesList = $form_state->getUserInput()['roles'];
     if (is_array($rolesList)) {
       foreach ($rolesList as $rid => $role) {
-        // Check condition for authenticated role.
+        // If the "authenticated" authenticated role is disabled, we need to
+        // disable the "disable_for_administrators" setting:
         if ($rid === 'authenticated') {
-          if ($role["enabled"]) {
-            $config->set('disable_for_administrators', $form_state->getValue('disable_for_administrators'));
-          }
-          else {
-            $config->set('disable_for_administrators', FALSE);
-          }
+          $role['enabled'] ? $config->set('disable_for_administrators', $form_state->getValue('disable_for_administrators')) : $config->set('disable_for_administrators', FALSE);
         }
         $config->set('roles.' . $rid, $role);
       }
