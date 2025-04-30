@@ -19,7 +19,11 @@ class FrontPageSettingsFormTest extends BrowserTestBase {
   /**
    * {@inheritdoc}
    */
-  protected static $modules = ['user', 'front_page'];
+  protected static $modules = [
+    'user',
+    'front_page',
+    'test_page_test',
+  ];
 
   /**
    * {@inheritdoc}
@@ -46,7 +50,7 @@ class FrontPageSettingsFormTest extends BrowserTestBase {
     $edit = [
       'front_page_enable' => TRUE,
       'roles[anonymous][enabled]' => TRUE,
-      'roles[anonymous][path]' => '/node/1',
+      'roles[anonymous][path]' => '/test-page',
     ];
     $this->submitForm($edit, 'Save Settings');
 
