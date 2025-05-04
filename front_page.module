@@ -32,6 +32,13 @@ function front_page_help($route_name, RouteMatchInterface $route_match) {
 function front_page_user_role_delete($role) {
   // Delete Front configuration for the role being deleted.
   $config = \Drupal::configFactory()->getEditable('front_page.settings');
+
+  // Configuration didn't exist before
+  // so we don't need to clear it (thus create it).
+  if ($config->isNew()) {
+    return;
+  }
+
   $config->clear('rid_' . $role->id());
   $config->save();
 }
