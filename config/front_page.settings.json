@@ -1,0 +1,6 @@
+{
+    "_config_name": "front_page.settings",
+    "front_page_enable": "0",
+    "front_page_home_link_path": "",
+    "front_page_role_rid": "dynamic variable in file /front/front_page.module line 297"
+}

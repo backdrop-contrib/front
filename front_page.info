@@ -1,5 +1,6 @@
 name = Front Page
-description = Allows site admins setup custom front pages for the site.
+description = Allows site admins to setup custom front pages for the site based on user role.
 package = Administration
-core = 7.x
+backdrop = 1.x
+type = module
 configure = admin/config/front/settings

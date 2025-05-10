@@ -5,111 +5,39 @@
  * Install, update and uninstall functions for the front page module.
  */
 
+
+
+/**
+ * Implements hook_uninstall().().
+ */
+function front_page_uninstall() {
+  config_clear('front_page.settings', 'front_page_enable');
+
+  foreach (user_roles() as $rid => $role) {
+    config_clear('front_page.settings', "front_page_role_{$rid}");
+  }
+}
+
+/**
+ * Migrate front_page variables to config.
+ */
+function front_page_update_1000() {
+  $config = config('front_page.settings');
+  $config->set('front_page_enable', update_variable_get('front_page_enable', '0'));
+  $config->set('front_page_home_link_path', update_variable_get('front_page_home_link_path', ''));
+  $config->set('front_page_role_rid', update_variable_get('front_page_role_rid', 'dynamic variable in file /front/front_page.module line 297'));
+  $config->save();
+
+  update_variable_del('front_page_enable');
+  update_variable_del('front_page_home_link_path');
+  update_variable_del('front_page_role_rid');
+}
+
 /**
  * Implements hook_install().
  */
 function front_page_install() {
-
+  // Dynamically generated variable data was detected.
+  // /front/front_page.module line 297
 }
 
-/**
- * Implements hook_uninstall().
- */
-function front_page_uninstall() {
-  variable_del('front_page_enable');
-
-  foreach (user_roles() as $rid => $role) {
-    variable_del("front_page_role_{$rid}");
-  }
-}
-
-/**
- * Update 7200 - Add table if not already added, transfer data into the table and correct special notice times.
- */
-function front_page_update_7200() {
-  if (!db_table_exists('front_page')) {
-    $schema = drupal_get_schema_unprocessed('front_page');
-    _drupal_schema_initialize($schema, 'front_page', FALSE);
-    if (isset($schema['front_page'])) {
-      db_create_table('front_page', $schema['front_page']);
-    }
-
-    // need to add front page data from variables table to new table.
-    $formats = filter_formats();
-    $formats = drupal_map_assoc(array_keys($formats));
-    $default_format = array_shift($formats);
-    $php_format = isset($formats['php_code']) ? 'php_code' : $default_format;
-
-    $roles = user_roles();
-    foreach ($roles as $rid => $role_name) {
-      $mode = variable_get('front_' . $rid . '_type', '');
-      if (!empty($mode)) {
-        switch ($mode) {
-          case 'themed':
-          case 'full':
-            $data = variable_get('front_' . $rid . '_text', '');
-            $format = $default_format;
-            if (variable_get('front_' . $rid . '_php', 0)) {
-              $format = $php_format;
-            }
-            break;
-          case 'redirect':
-          case 'alias':
-            $data = variable_get('front_' . $rid . '_redirect', '');
-            $format = '';
-            break;
-          default:
-            $mode = '';
-            $format = '';
-            $data = '';
-            break;
-        }
-        $weight = $rid * -1;
-        db_merge('front_page')
-            ->key(array('rid' => $rid))
-            ->fields(array(
-              'mode' => $mode,
-              'data' => $data,
-              'filter_format' => $format,
-              'weight' => $weight,
-            ))
-            ->execute();
-        variable_del('front_' . $rid . '_type');
-        variable_del('front_' . $rid . '_text');
-        variable_del('front_' . $rid . '_php');
-        variable_del('front_' . $rid . '_redirect');
-      }
-    }
-  }
-
-  if (variable_get('site_frontpage', 'node') == 'front_page') {
-    variable_set('site_frontpage', 'node');
-  }
-}
-
-function front_page_update_7201() {
-  variable_del('special_notice_time');
-  variable_del('special_notice_text');
-
-  variable_del('front_page_breadcrumb');
-  $path = variable_get('front_page_breadcrumb_redirect', '');
-  variable_set('front_page_home_link_path', $path);
-  variable_del('front_page_breadcrumb_redirect');
-}
-
-/**
- * Move data from front_page table to variables and drop table.
- */
-function front_page_update_7202() {
-  $result = db_select('front_page', 'fp')
-    ->fields('fp')
-    ->execute();
-
-  foreach ($result as $role) {
-    variable_set("front_page_role_{$role->rid}", (array) $role);
-  }
-
-  if (db_table_exists('front_page')) {
-    db_drop_table('front_page');
-  }
-}

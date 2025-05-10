@@ -14,7 +14,7 @@ function front_page_admin($form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Front Page Override'),
     '#description' => t('Enable this if you want the front page module to manage the home page.'),
-    '#default_value' => variable_get('front_page_enable', 0),
+    '#default_value' => config_get('front_page.settings', 'front_page_enable'),
   );
 
   // Load any existing settings and build the by redirect by role form
@@ -84,7 +84,7 @@ function front_page_admin($form, &$form_state) {
         'visible' => array(
           ':input[name="roles[' . $rid . '][mode]"]' => array(
             array('value' => 'full'),
-            array('value' => 'themed')
+            array('value' => 'themed'),
           ),
         ),
       ),
@@ -109,7 +109,7 @@ function front_page_admin($form, &$form_state) {
         'visible' => array(
           ':input[name="roles[' . $rid . '][mode]"]' => array(
             array('value' => 'redirect'),
-            array('value' => 'alias')
+            array('value' => 'alias'),
           ),
         ),
       ),
@@ -166,7 +166,7 @@ function front_page_admin_validate($form, &$form_state) {
  * Submit hook for front_page_admin.
  */
 function front_page_admin_submit($form, &$form_state) {
-  variable_set('front_page_enable', $form_state['values']['front_page_enable']);
+  config_set('front_page.settings', 'front_page_enable', $form_state['values']['front_page_enable']);
 
   if (is_array($form_state['values']['roles'])) {
     foreach ($form_state['values']['roles'] as $rid => $role) {
@@ -179,7 +179,7 @@ function front_page_admin_submit($form, &$form_state) {
           $data['data'] = $role['data_wrapper']['data']['value'];
           $data['filter_format'] = $role['data_wrapper']['data']['format'];
 
-          variable_set("front_page_role_{$rid}", $data);
+          config_set('front_page.settings', "front_page_role_{$rid}", $data);
           break;
         case 'redirect':
         case 'alias':
@@ -189,7 +189,7 @@ function front_page_admin_submit($form, &$form_state) {
           $data['data'] = $role['path'];
           $data['filter_format'] = '';
 
-          variable_set("front_page_role_{$rid}", $data);
+          config_set('front_page.settings', "front_page_role_{$rid}", $data);
           break;
         default:
           $data = _front_page_get_by_rid_with_default($rid);
@@ -198,12 +198,12 @@ function front_page_admin_submit($form, &$form_state) {
           $data['data'] = '';
           $data['filter_format'] = '';
 
-          variable_set("front_page_role_{$rid}", $data);
+          config_set('front_page.settings', "front_page_role_{$rid}", $data);
           break;
       }
     }
   }
-  drupal_set_message(t('Your settings have been saved.'));
+  backdrop_set_message(t('Your settings have been saved.'));
 }
 
 /**
@@ -222,7 +222,7 @@ function front_page_admin_arrange_form($form, &$form_state) {
   foreach ($front_page_data as $role_id => $role) {
     $form['roles'][$role_id]['title']['#markup'] = $role['name'];
     $form['roles'][$role_id]['mode']['#markup'] = !empty($role['mode']) ? $role['mode'] : 'skip';
-    $form['roles'][$role_id]['preview']['#markup'] = !empty($role['mode']) ? l(t('preview'), 'front_page/preview/' . $role_id, array('attributes' => array('target' => '_blank'))) : '';
+    $form['roles'][$role_id]['preview']['#markup'] = !empty($role['mode'])?l(t('preview'), 'front_page/preview/' . $role_id, array('attributes' => array('target' => '_blank'))) : '';
     if (!empty($role['mode'])) {
       $form['roles'][$role_id]['enabled'] = array(
         '#type' => 'checkbox',
@@ -264,14 +264,14 @@ function front_page_admin_arrange_form_submit($form, &$form_state) {
       $data['filter_format'] = '';
       $data['weight'] = $role['weight'];
 
-      variable_set("front_page_role_{$rid}", $data);
+      config_set('front_page.settings', "front_page_role_{$rid}", $data);
     }
     else {
       $data = _front_page_get_by_rid_with_default($rid);
 
       $data['weight'] = $role['weight'];
 
-      variable_set("front_page_role_{$rid}", $data);
+      config_set('front_page.settings', "front_page_role_{$rid}", $data);
     }
   }
 }
@@ -280,13 +280,16 @@ function front_page_admin_arrange_form_submit($form, &$form_state) {
  * Form for setting the <front> placeholder to another path.
  */
 function front_page_admin_home_links($form, &$form_state) {
+  $config = config('front_page.settings');
+  $form['#config'] = 'front_page.settings';
   $form['front_page_home_link_path'] = array(
     '#type' => 'textfield',
     '#title' => t('Redirect your site HOME links to'),
-    '#default_value' => variable_get('front_page_home_link_path', ''),
-    '#cols' => 20, '#rows' => 1,
+    '#default_value' => $config->get('front_page_home_link_path'),
+    '#cols' => 20,
+    '#rows' => 1,
     '#description' => t('Specify where the user should be redirected to. An example would be <em>node/12</em>. Leave blank when you\'re not using HOME redirect.'),
-    '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (variable_get('clean_url', 0) ? '' : '?q=')
+    '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q='),
   );
 
   return system_settings_form($form);
@@ -302,7 +305,7 @@ function front_page_admin_home_links($form, &$form_state) {
 function theme_front_page_admin_arrange_form($variables) {
   $form = $variables['form'];
 
-  drupal_add_tabledrag('front-page-arrange', 'order', 'sibling', 'front-page-weight');
+  backdrop_add_tabledrag('front-page-arrange', 'order', 'sibling', 'front-page-weight');
 
   $header = array(
     t('Role'),
@@ -320,11 +323,11 @@ function theme_front_page_admin_arrange_form($variables) {
     $element['weight']['#attributes']['class'] = array('front-page-weight');
 
     $row = array();
-    $row[] = drupal_render($element['title']);
-    $row[] = drupal_render($element['mode']);
-    $row[] = drupal_render($element['preview']);
-    $row[] = drupal_render($element['enabled']);
-    $row[] = drupal_render($element['weight']);
+    $row[] = backdrop_render($element['title']);
+    $row[] = backdrop_render($element['mode']);
+    $row[] = backdrop_render($element['preview']);
+    $row[] = backdrop_render($element['enabled']);
+    $row[] = backdrop_render($element['weight']);
 
     $row = array_merge(array('data' => $row), $element['#attributes']);
     $row['class'][] = 'draggable';
@@ -332,9 +335,12 @@ function theme_front_page_admin_arrange_form($variables) {
   }
   $output = '';
   if (empty($rows)) {
-    $rows[] = array(array('data' => 'no roles', 'colspan' => '5'));
+    $rows[] = array(array(
+        'data' => 'no roles',
+        'colspan' => '5',
+      ));
   }
   $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'front-page-arrange')));
-  $output .= drupal_render_children($form);
+  $output .= backdrop_render_children($form);
   return $output;
 }
