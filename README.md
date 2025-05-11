@@ -16,20 +16,17 @@ Help and Functionality
 
 Some notes about this module:
 
-1. Allows you to specify a custom front page based on role type.
-
-2. Allows 4 different override types:
-    1. Themed - Allows you to add content that will display as a standard
-          themed Drupal page.
-    2. Full - Allows you to add content that will be displayed on the screen
-          as is. This method is the same as declaring a whole HTML page.
-    3. Redirect - Allows you to 301 redirect the user to another path.
-    4. Alias - Allows you to specify a local path which will then display as
+* Allows you to specify a custom front page based on role type.
+* Allows 4 different override types:
+  * Themed - Allows you to add content that will display as a standard
+    	     themed Drupal page.
+  * Full - Allows you to add content that will be displayed on the screen
+             as is. This method is the same as declaring a whole HTML page.
+  * Redirect - Allows you to 301 redirect the user to another path.
+  * Alias - Allows you to specify a local path which will then display as
           the home page without redirecting the user.
-
-4. Allow Themed and Full display types to be passed through Drupals input filters.
-
-5. Override Home Links to go to another local path. This could be to stop users
+* Allow Themed and Full display types to be passed through Drupals input filters.
+* Override Home Links to go to another local path. This could be to stop users
     going back to a splash screen.
 
 
