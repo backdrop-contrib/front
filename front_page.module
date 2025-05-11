@@ -6,29 +6,11 @@
  *
  * This version is for Backdrop 7. Earlier versions can be found at http://drupal.org/project/front.
  *
- * This module version was developed by timhilliard and various members of the backdrop community.
- *
- * If you have any ideas/patches or requests, please post them at http://drupal.org/project/issues/front.
- *
  */
 
-/**
- * Implements hook_help().().
- */
-function front_page_help($section) {
-  switch ($section) {
-    case 'admin/config/front/settings':
-      return t('<p>Setup custom front pages for your site.</p>');
-    case 'admin/config/front/arrange':
-      return t('<p>Arrange the order in which roles will be checked for custom front page settings. Roles will be processed from top to bottom. To enable other roles you must first enable them in the !link.</p>', array('!link' => l(t('Settings tab'), 'admin/config/front/settings')));
-    case 'admin/config/front/home-links':
-      return t('<p>If a HOME link is set, the &lt;front&gt; placeholder will be replaced with this value instead of the standard front page.</p>');
-  }
-}
 
 /**
- * Implements hook_menu().().
- */
+ * Implements hook_menu(). */
 function front_page_menu() {
   // Front page settings.
   $items['admin/config/front'] = array(
@@ -82,8 +64,7 @@ function front_page_menu() {
 }
 
 /**
- * Implements hook_permission().().
- */
+ * Implements hook_permission(). */
 function front_page_permission() {
   return array(
     'administer front page' => array(
@@ -105,12 +86,11 @@ function front_page_config_info() {
 }
 
 /**
- * Implements hook_init().().
- */
+ * Implements hook_init(). */
 function front_page_init() {
   $config = config('front_page.settings');
-  // Make sure front page module is not run when using cli (drush).
-  // Make sur front page module does not run when installing Backdrop either.
+  // Make sure front page module is not run when using cli.
+  // Make sure front page module does not run when installing Backdrop either.
   if (backdrop_is_cli() || backdrop_installation_attempted()) {
     return;
   }
@@ -125,6 +105,9 @@ function front_page_init() {
 
   global $_front_page, $conf;
 
+  //$site_config = config('system.core');
+  //$site_frontpage = $site_config->get('site_frontpage');
+  
   // let administrator know that there is a config error.
   if (config_get('system.core', 'site_frontpage') == 'front_page' && user_access('administer menu')) {
     backdrop_set_message(t('There is a configuration error. The home page should not be set to the path "front_page". Please change this !link', array('!link' => l(t('here'), 'admin/config/system/site-information'))), 'error');
@@ -134,6 +117,10 @@ function front_page_init() {
     $_front_page = front_page_get_by_role();
   }
 
+  
+  
+  $match = array();
+  
   if (user_access('administer menu') && preg_match('@^front_page/preview/([0-9]+)$@', $_GET['q'], $match)) {
     $_front_page = front_page_get_by_rid($match[1]);
   }
@@ -198,6 +185,7 @@ function front_page() {
 function front_page_parse_url($path) {
   $url['path'] = $path;
   $url['options'] = array();
+  $match = array();
   if (preg_match('@^(?P<path>[^?#]+)(\?(?P<query>[^#]*))?(#(?P<fragment>.*))?$@', $path, $match)) {
     $url['path'] = $match['path'];
     if (!empty($match['query'])) {
@@ -226,10 +214,10 @@ function front_page_get_by_role($index = 0, $number = 1) {
   global $user;
 
   $roles = array();
-  foreach (array_keys($user->roles) as $rid) {
+  foreach ($user->roles as $rid) {
     $roles[] = front_page_get_by_rid($rid);
   }
-
+  
   $roles = array_filter($roles);
 
   if (empty($roles)) {
@@ -265,7 +253,7 @@ function front_page_get_all() {
 }
 
 /**
- * Implements hook_page_url_outbound_alter().().
+ * Implements hook_page_url_outbound_alter().
  *
  * This alters anything parsed through the url() function to replace the <front> string
  *  with an alternative string instead of the site_frontpage setting.
@@ -283,7 +271,7 @@ function front_page_url_outbound_alter(&$path, &$options, &$original_path) {
 }
 
 /**
- * Implements hook_theme().().
+ * Implements hook_theme().
  */
 function front_page_theme() {
   return array(
@@ -295,7 +283,7 @@ function front_page_theme() {
 }
 
 /**
- * Implements hook_user_role_delete().().
+ * Implements hook_user_role_delete().
  */
 function front_page_user_role_delete($role) {
   // Delete Front configuration for the role being deleted.

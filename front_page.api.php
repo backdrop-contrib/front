@@ -16,9 +16,10 @@
  * role, then this won't get invoked.
  */
 function hook_front_page_alter(&$front_page) {
+  global $user;
   if ($front_page['mode'] == 'redirect'
-      && in_array('customer user', array_values($account->roles))
-      && $account->login_page == 'reports') {
+      && in_array('customer user', array_values($user->roles))
+      && $user->login_page == 'reports') {
     $front_page['path'] = 'user/reports';
   }
 }

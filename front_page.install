@@ -8,36 +8,24 @@
 
 
 /**
- * Implements hook_uninstall().().
- */
+ * Implements hook_uninstall(). */
 function front_page_uninstall() {
   config_clear('front_page.settings', 'front_page_enable');
 
-  foreach (user_roles() as $rid => $role) {
+  foreach (user_roles() as $rid => $role_label) {
     config_clear('front_page.settings', "front_page_role_{$rid}");
   }
 }
 
-/**
- * Migrate front_page variables to config.
- */
-function front_page_update_1000() {
-  $config = config('front_page.settings');
-  $config->set('front_page_enable', update_variable_get('front_page_enable', '0'));
-  $config->set('front_page_home_link_path', update_variable_get('front_page_home_link_path', ''));
-  $config->set('front_page_role_rid', update_variable_get('front_page_role_rid', 'dynamic variable in file /front/front_page.module line 297'));
-  $config->save();
-
-  update_variable_del('front_page_enable');
-  update_variable_del('front_page_home_link_path');
-  update_variable_del('front_page_role_rid');
-}
 
 /**
  * Implements hook_install().
  */
 function front_page_install() {
-  // Dynamically generated variable data was detected.
-  // /front/front_page.module line 297
+  $config = config('front_page.settings');
+  $config->set('front_page_enable', '0');
+  $config->set('front_page_home_link_path', '');
+  $config->set('front_page_role_rid', '');
+  $config->save();
 }
 

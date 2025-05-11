@@ -55,8 +55,8 @@ function front_page_admin($form, &$form_state) {
   }
 
   // Iterate each role
-  foreach ($roles as $rid => $role) {
-
+  foreach ($roles as $rid => $role_label) {
+    
     // Determine the mode for this role
     $mode = isset($front_page_data[$rid]['mode']) ? $front_page_data[$rid]['mode'] : '';
 
@@ -64,7 +64,7 @@ function front_page_admin($form, &$form_state) {
       '#type' => 'fieldset',
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
-      '#title' => t('Front Page for !rolename (%mode)', array('!rolename' => $role, '%mode' => $modes[$mode])),
+      '#title' => t('Front Page for !rolename (%mode)', array('!rolename' => $role_label, '%mode' => $modes[$mode])),
       '#weight' => isset($front_page_data[$rid]['weight']) ? $front_page_data[$rid]['weight'] : 0,
     );
 
