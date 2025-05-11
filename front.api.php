@@ -15,7 +15,7 @@
  * admin settings page. If 'skip' is set as option for any
  * role, then this won't get invoked.
  */
-function hook_front_page_alter(&$front_page) {
+function hook_front_alter(&$front_page) {
   global $user;
   if ($front_page['mode'] == 'redirect'
       && in_array('customer user', array_values($user->roles))

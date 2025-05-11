@@ -1,0 +1,7 @@
+Front Page
+==========
+
+2025-05-10
+  In the process of converting for Backdrop CMS, I found I needed to refactor
+  the module to simply be named "front", to match the project name, instead of
+  the drupal module name of "front_page".

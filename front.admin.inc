@@ -8,13 +8,13 @@
 /**
  * Form for configuring front page settings.
  */
-function front_page_admin($form, &$form_state) {
+function front_admin($form, &$form_state) {
 
-  $form['front_page_enable'] = array(
+  $form['front_enable'] = array(
     '#type' => 'checkbox',
     '#title' => t('Front Page Override'),
     '#description' => t('Enable this if you want the front page module to manage the home page.'),
-    '#default_value' => config_get('front_page.settings', 'front_page_enable'),
+    '#default_value' => config_get('front.settings', 'front_enable'),
   );
 
   // Load any existing settings and build the by redirect by role form
@@ -28,7 +28,7 @@ function front_page_admin($form, &$form_state) {
 
   // build the form for roles
   $roles = user_roles();
-  $front_page_data = front_page_get_all();
+  $front_data = front_get_all();
 
   // Map the available modes common for all roles.
   $modes = array(
@@ -42,7 +42,7 @@ function front_page_admin($form, &$form_state) {
   // Set the description common for all roles.
   $descriptions = array(
     '' => t('Disable functionality for this role.'),
-    'themed' => t('Means your default layout, theme and stylesheet will be loaded with your custom front_page.'),
+    'themed' => t('Means your default layout, theme and stylesheet will be loaded with your custom front.'),
     'full' => t('Allows you to have a completely different layout, style sheet etc.'),
     'redirect' => t('Will automatically redirect visitors to a specific page specified in the REDIRECT TO box.'),
     'alias' => t('Will display the page listed in path as if it were the home page. This option does not redirect.'),
@@ -58,14 +58,14 @@ function front_page_admin($form, &$form_state) {
   foreach ($roles as $rid => $role_label) {
     
     // Determine the mode for this role
-    $mode = isset($front_page_data[$rid]['mode']) ? $front_page_data[$rid]['mode'] : '';
+    $mode = isset($front_data[$rid]['mode']) ? $front_data[$rid]['mode'] : '';
 
     $form['roles'][$rid] = array(
       '#type' => 'fieldset',
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
       '#title' => t('Front Page for !rolename (%mode)', array('!rolename' => $role_label, '%mode' => $modes[$mode])),
-      '#weight' => isset($front_page_data[$rid]['weight']) ? $front_page_data[$rid]['weight'] : 0,
+      '#weight' => isset($front_data[$rid]['weight']) ? $front_data[$rid]['weight'] : 0,
     );
 
     $form['roles'][$rid]['mode'] = array(
@@ -93,15 +93,15 @@ function front_page_admin($form, &$form_state) {
     $form['roles'][$rid]['data_wrapper']['data'] = array(
       '#type' => 'text_format',
       '#title' => t('Data'),
-      '#default_value' => (isset($front_page_data[$rid]['data']) && isset($front_page_data[$rid]['mode']) && ($front_page_data[$rid]['mode'] == 'themed' || $front_page_data[$rid]['mode'] == 'full')) ? $front_page_data[$rid]['data'] : NULL,
-      '#format' => !empty($front_page_data[$rid]['filter_format']) ? $front_page_data[$rid]['filter_format'] : NULL,
+      '#default_value' => (isset($front_data[$rid]['data']) && isset($front_data[$rid]['mode']) && ($front_data[$rid]['mode'] == 'themed' || $front_data[$rid]['mode'] == 'full')) ? $front_data[$rid]['data'] : NULL,
+      '#format' => !empty($front_data[$rid]['filter_format']) ? $front_data[$rid]['filter_format'] : NULL,
       '#description' => t('Paste your HTML or TEXT here.') . '<br /><br />' . t('You can paste in the full HTML code for a complete page and include a different style sheet in the HEAD of the document if you want a completely different layout and style to the rest of your site.'),
     );
 
     $form['roles'][$rid]['path'] = array(
       '#type' => 'textfield',
       '#title' => t('Path'),
-      '#default_value' => (isset($front_page_data[$rid]['data']) && isset($front_page_data[$rid]['mode']) && ($front_page_data[$rid]['mode'] == 'redirect' || $front_page_data[$rid]['mode'] == 'alias')) ? $front_page_data[$rid]['data'] : NULL,
+      '#default_value' => (isset($front_data[$rid]['data']) && isset($front_data[$rid]['mode']) && ($front_data[$rid]['mode'] == 'redirect' || $front_data[$rid]['mode'] == 'alias')) ? $front_data[$rid]['data'] : NULL,
       '#cols' => 20,
       '#rows' => 1,
       '#description' => t('If you are using <strong>Redirect</strong> or <strong>Alias</strong> you need to specify the path. An alias path should only include the URL part of a URL (eg "node/51"). A redirect path can contain a full URL including get parameters and fragment string (eg "node/51?page=5#anchor").'),
@@ -132,9 +132,9 @@ function front_page_admin($form, &$form_state) {
 }
 
 /**
- * Validation hook for front_page_admin.
+ * Validation hook for front_admin.
  */
-function front_page_admin_validate($form, &$form_state) {
+function front_admin_validate($form, &$form_state) {
   if (is_array($form_state['values']['roles'])) {
     foreach ($form_state['values']['roles'] as $rid => $role) {
       switch ($role['mode']) {
@@ -163,42 +163,42 @@ function front_page_admin_validate($form, &$form_state) {
 }
 
 /**
- * Submit hook for front_page_admin.
+ * Submit hook for front_admin.
  */
-function front_page_admin_submit($form, &$form_state) {
-  config_set('front_page.settings', 'front_page_enable', $form_state['values']['front_page_enable']);
+function front_admin_submit($form, &$form_state) {
+  config_set('front.settings', 'front_enable', $form_state['values']['front_enable']);
 
   if (is_array($form_state['values']['roles'])) {
     foreach ($form_state['values']['roles'] as $rid => $role) {
       switch ($role['mode']) {
         case 'themed':
         case 'full':
-          $data = _front_page_get_by_rid_with_default($rid);
+          $data = _front_get_by_rid_with_default($rid);
 
           $data['mode'] = $role['mode'];
           $data['data'] = $role['data_wrapper']['data']['value'];
           $data['filter_format'] = $role['data_wrapper']['data']['format'];
 
-          config_set('front_page.settings', "front_page_role_{$rid}", $data);
+          config_set('front.settings', "front_role_{$rid}", $data);
           break;
         case 'redirect':
         case 'alias':
-          $data = _front_page_get_by_rid_with_default($rid);
+          $data = _front_get_by_rid_with_default($rid);
 
           $data['mode'] = $role['mode'];
           $data['data'] = $role['path'];
           $data['filter_format'] = '';
 
-          config_set('front_page.settings', "front_page_role_{$rid}", $data);
+          config_set('front.settings', "front_role_{$rid}", $data);
           break;
         default:
-          $data = _front_page_get_by_rid_with_default($rid);
+          $data = _front_get_by_rid_with_default($rid);
 
           $data['mode'] = '';
           $data['data'] = '';
           $data['filter_format'] = '';
 
-          config_set('front_page.settings', "front_page_role_{$rid}", $data);
+          config_set('front.settings', "front_role_{$rid}", $data);
           break;
       }
     }
@@ -209,20 +209,20 @@ function front_page_admin_submit($form, &$form_state) {
 /**
  * Form for arranging the roles according to what order the roles should be processed.
  */
-function front_page_admin_arrange_form($form, &$form_state) {
+function front_admin_arrange_form($form, &$form_state) {
   $roles = user_roles();
-  $front_page_data = front_page_get_all();
+  $front_data = front_get_all();
   foreach ($roles as $rid => $role) {
-    $front_page_data[$rid]['name'] = $role;
+    $front_data[$rid]['name'] = $role;
   }
 
   $form['roles'] = array(
     '#tree' => TRUE,
   );
-  foreach ($front_page_data as $role_id => $role) {
+  foreach ($front_data as $role_id => $role) {
     $form['roles'][$role_id]['title']['#markup'] = $role['name'];
     $form['roles'][$role_id]['mode']['#markup'] = !empty($role['mode']) ? $role['mode'] : 'skip';
-    $form['roles'][$role_id]['preview']['#markup'] = !empty($role['mode'])?l(t('preview'), 'front_page/preview/' . $role_id, array('attributes' => array('target' => '_blank'))) : '';
+    $form['roles'][$role_id]['preview']['#markup'] = !empty($role['mode'])?l(t('preview'), 'front/preview/' . $role_id, array('attributes' => array('target' => '_blank'))) : '';
     if (!empty($role['mode'])) {
       $form['roles'][$role_id]['enabled'] = array(
         '#type' => 'checkbox',
@@ -251,27 +251,27 @@ function front_page_admin_arrange_form($form, &$form_state) {
 }
 
 /**
- * Submit hook for front_page_admin_arrange_form.
+ * Submit hook for front_admin_arrange_form.
  */
-function front_page_admin_arrange_form_submit($form, &$form_state) {
-  $front_page_data = front_page_get_all();
+function front_admin_arrange_form_submit($form, &$form_state) {
+  $front_data = front_get_all();
   foreach ($form_state['values']['roles'] as $rid => $role) {
-    if (isset($role['mode']) && !$role['mode'] || !isset($front_page_data[$rid])) {
-      $data = _front_page_get_by_rid_with_default($rid);
+    if (isset($role['mode']) && !$role['mode'] || !isset($front_data[$rid])) {
+      $data = _front_get_by_rid_with_default($rid);
 
       $data['mode'] = '';
       $data['data'] = '';
       $data['filter_format'] = '';
       $data['weight'] = $role['weight'];
 
-      config_set('front_page.settings', "front_page_role_{$rid}", $data);
+      config_set('front.settings', "front_role_{$rid}", $data);
     }
     else {
-      $data = _front_page_get_by_rid_with_default($rid);
+      $data = _front_get_by_rid_with_default($rid);
 
       $data['weight'] = $role['weight'];
 
-      config_set('front_page.settings', "front_page_role_{$rid}", $data);
+      config_set('front.settings', "front_role_{$rid}", $data);
     }
   }
 }
@@ -279,13 +279,13 @@ function front_page_admin_arrange_form_submit($form, &$form_state) {
 /**
  * Form for setting the <front> placeholder to another path.
  */
-function front_page_admin_home_links($form, &$form_state) {
-  $config = config('front_page.settings');
-  $form['#config'] = 'front_page.settings';
-  $form['front_page_home_link_path'] = array(
+function front_admin_home_links($form, &$form_state) {
+  $config = config('front.settings');
+  $form['#config'] = 'front.settings';
+  $form['front_home_link_path'] = array(
     '#type' => 'textfield',
     '#title' => t('Redirect your site HOME links to'),
-    '#default_value' => $config->get('front_page_home_link_path'),
+    '#default_value' => $config->get('front_home_link_path'),
     '#cols' => 20,
     '#rows' => 1,
     '#description' => t('Specify where the user should be redirected to. An example would be <em>node/12</em>. Leave blank when you\'re not using HOME redirect.'),
@@ -302,7 +302,7 @@ function front_page_admin_home_links($form, &$form_state) {
  *   An associative array containing:
  *   - form: A render element representing the form.
  */
-function theme_front_page_admin_arrange_form($variables) {
+function theme_front_admin_arrange_form($variables) {
   $form = $variables['form'];
 
   backdrop_add_tabledrag('front-page-arrange', 'order', 'sibling', 'front-page-weight');

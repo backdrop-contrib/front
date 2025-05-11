@@ -1,0 +1,31 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the front page module.
+ */
+
+
+
+/**
+ * Implements hook_uninstall(). */
+function front_uninstall() {
+  config_clear('front.settings', 'front_enable');
+
+  foreach (user_roles() as $rid => $role_label) {
+    config_clear('front.settings', "front_role_{$rid}");
+  }
+}
+
+
+/**
+ * Implements hook_install().
+ */
+function front_install() {
+  $config = config('front.settings');
+  $config->set('front_enable', '0');
+  $config->set('front_home_link_path', '');
+  $config->set('front_role_rid', '');
+  $config->save();
+}
+

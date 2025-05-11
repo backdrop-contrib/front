@@ -11,7 +11,7 @@
 
 /**
  * Implements hook_menu(). */
-function front_page_menu() {
+function front_menu() {
   // Front page settings.
   $items['admin/config/front'] = array(
     'title' => 'Front Page',
@@ -29,34 +29,34 @@ function front_page_menu() {
     'description' => 'Administer custom front page settings.',
     'weight' => 0,
     'page callback' => 'backdrop_get_form',
-    'page arguments' => array('front_page_admin'),
+    'page arguments' => array('front_admin'),
     'access arguments' => array('administer front page'),
     'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
-    'file' => 'front_page.admin.inc',
+    'file' => 'front.admin.inc',
   );
   $items['admin/config/front/arrange'] = array(
     'title' => 'Arrange',
     'description' => 'Ability to re-arrange what order front page roles are processed.',
     'page callback' => 'backdrop_get_form',
-    'page arguments' => array('front_page_admin_arrange_form'),
+    'page arguments' => array('front_admin_arrange_form'),
     'access arguments' => array('administer front page'),
     'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
-    'file' => 'front_page.admin.inc',
+    'file' => 'front.admin.inc',
     'weight' => 1,
   );
   $items['admin/config/front/home-links'] = array(
     'title' => 'Home links',
     'description' => 'Allows you to change the location of the &lt;front&gt; placeholder.',
     'page callback' => 'backdrop_get_form',
-    'page arguments' => array('front_page_admin_home_links'),
+    'page arguments' => array('front_admin_home_links'),
     'access arguments' => array('administer front page'),
     'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
-    'file' => 'front_page.admin.inc',
+    'file' => 'front.admin.inc',
     'weight' => 2,
   );
-  $items['front_page'] = array(
+  $items['front'] = array(
     'title' => '',
-    'page callback' => 'front_page',
+    'page callback' => 'front',
     'access callback' => TRUE,
     'type' => MENU_SUGGESTED_ITEM,
   );
@@ -65,7 +65,7 @@ function front_page_menu() {
 
 /**
  * Implements hook_permission(). */
-function front_page_permission() {
+function front_permission() {
   return array(
     'administer front page' => array(
       'title' => t('Administer front page'),
@@ -77,8 +77,8 @@ function front_page_permission() {
 /**
  * Implements hook_config_info().
  */
-function front_page_config_info() {
-  $prefixes['front_page.settings'] = array(
+function front_config_info() {
+  $prefixes['front.settings'] = array(
     'label' => t('Front Page settings'),
     'group' => t('Configuration'),
   );
@@ -87,8 +87,8 @@ function front_page_config_info() {
 
 /**
  * Implements hook_init(). */
-function front_page_init() {
-  $config = config('front_page.settings');
+function front_init() {
+  $config = config('front.settings');
   // Make sure front page module is not run when using cli.
   // Make sure front page module does not run when installing Backdrop either.
   if (backdrop_is_cli() || backdrop_installation_attempted()) {
@@ -103,47 +103,47 @@ function front_page_init() {
     return;
   }
 
-  global $_front_page, $conf;
+  global $_front, $conf;
 
   //$site_config = config('system.core');
   //$site_frontpage = $site_config->get('site_frontpage');
   
   // let administrator know that there is a config error.
-  if (config_get('system.core', 'site_frontpage') == 'front_page' && user_access('administer menu')) {
-    backdrop_set_message(t('There is a configuration error. The home page should not be set to the path "front_page". Please change this !link', array('!link' => l(t('here'), 'admin/config/system/site-information'))), 'error');
+  if (config_get('system.core', 'site_frontpage') == 'front' && user_access('administer menu')) {
+    backdrop_set_message(t('There is a configuration error. The home page should not be set to the path "front". Please change this !link', array('!link' => l(t('here'), 'admin/config/system/site-information'))), 'error');
   }
 
-  if ($config->get('front_page_enable') && backdrop_is_front_page()) {
-    $_front_page = front_page_get_by_role();
+  if ($config->get('front_enable') && backdrop_is_front_page()) {
+    $_front = front_get_by_role();
   }
 
   
   
   $match = array();
   
-  if (user_access('administer menu') && preg_match('@^front_page/preview/([0-9]+)$@', $_GET['q'], $match)) {
-    $_front_page = front_page_get_by_rid($match[1]);
+  if (user_access('administer menu') && preg_match('@^front/preview/([0-9]+)$@', $_GET['q'], $match)) {
+    $_front = front_get_by_rid($match[1]);
   }
 
-  if ($_front_page) {
+  if ($_front) {
     // Let other hooks modify
-    backdrop_alter('front_page', $_front_page);
+    backdrop_alter('front', $_front);
 
-    switch ($_front_page['mode']) {
+    switch ($_front['mode']) {
       case 'themed':
       case 'full':
-        $_GET['q'] = 'front_page';
+        $_GET['q'] = 'front';
         // need to set variable site_frontpage to current path so that it thinks it is the front page.
         $conf['site_frontpage'] = $_GET['q'];
         break;
 
       case 'redirect':
-        $url = front_page_parse_url($_front_page['data']);
+        $url = front_parse_url($_front['data']);
         backdrop_goto($url['path'], $url['options']);
         break;
 
       case 'alias':
-        $url = front_page_parse_url($_front_page['data']);
+        $url = front_parse_url($_front['data']);
         $_GET['q'] = backdrop_get_normal_path($url['path']);
         // need to set variable site_frontpage to current path so that it thinks it is the front page.
         $conf['site_frontpage'] = $_GET['q'];
@@ -158,17 +158,17 @@ function front_page_init() {
 /**
  * Function to handle the display of the front page themed and full types.
  */
-function front_page() {
-  // $_front_page variable should already have been loaded in front_page_init() function.
-  global $_front_page;
+function front() {
+  // $_front variable should already have been loaded in front_init() function.
+  global $_front;
 
-  if ($_front_page) {
-    switch ($_front_page['mode']) {
+  if ($_front) {
+    switch ($_front['mode']) {
       case 'themed':
-        return check_markup($_front_page['data'], $_front_page['filter_format']);
+        return check_markup($_front['data'], $_front['filter_format']);
 
       case 'full':
-        print check_markup($_front_page['data'], $_front_page['filter_format']);
+        print check_markup($_front['data'], $_front['filter_format']);
         exit;
     }
   }
@@ -182,7 +182,7 @@ function front_page() {
  * Function to parse a full URL including GET variables and fragment
  * to an array ready for backdrop_goto(), url(), or l() functions.
  */
-function front_page_parse_url($path) {
+function front_parse_url($path) {
   $url['path'] = $path;
   $url['options'] = array();
   $match = array();
@@ -210,12 +210,12 @@ function front_page_parse_url($path) {
 /**
  * Function to return the first role enabled in front page, ordered by weight.
  */
-function front_page_get_by_role($index = 0, $number = 1) {
+function front_get_by_role($index = 0, $number = 1) {
   global $user;
 
   $roles = array();
   foreach ($user->roles as $rid) {
-    $roles[] = front_page_get_by_rid($rid);
+    $roles[] = front_get_by_rid($rid);
   }
   
   $roles = array_filter($roles);
@@ -224,7 +224,7 @@ function front_page_get_by_role($index = 0, $number = 1) {
     return FALSE;
   }
 
-  uasort($roles, '_front_page_sort');
+  uasort($roles, '_front_sort');
 
   return reset($roles);
 }
@@ -232,8 +232,8 @@ function front_page_get_by_role($index = 0, $number = 1) {
 /**
  * Function to return the first role enabled in front page, ordered by weight.
  */
-function front_page_get_by_rid($rid) {
-  $role = _front_page_get_by_rid_with_default($rid);
+function front_get_by_rid($rid) {
+  $role = _front_get_by_rid_with_default($rid);
 
   return !empty($role['mode']) ? $role : FALSE;
 }
@@ -241,13 +241,13 @@ function front_page_get_by_rid($rid) {
 /**
  * Function to return all the roles in front page, ordered by weight.
  */
-function front_page_get_all() {
+function front_get_all() {
   $roles = array();
   foreach (user_roles() as $rid => $role) {
-    $roles[$rid] = _front_page_get_by_rid_with_default($rid);
+    $roles[$rid] = _front_get_by_rid_with_default($rid);
   }
 
-  uasort($roles, '_front_page_sort');
+  uasort($roles, '_front_sort');
 
   return $roles;
 }
@@ -258,13 +258,13 @@ function front_page_get_all() {
  * This alters anything parsed through the url() function to replace the <front> string
  *  with an alternative string instead of the site_frontpage setting.
  */
-function front_page_url_outbound_alter(&$path, &$options, &$original_path) {
-  // check if path is set to 'front_page' as this is our virtual home
+function front_url_outbound_alter(&$path, &$options, &$original_path) {
+  // check if path is set to 'front' as this is our virtual home
   // page and doesn't work properly unless used from home page.
-  if ($path == 'front_page') {
+  if ($path == 'front') {
     $original_path = $path = '';
   }
-  $newpath = config_get('front_page.settings', 'front_page_home_link_path');
+  $newpath = config_get('front.settings', 'front_home_link_path');
   if (($path == '<front>' || empty($path)) && !empty($newpath)) {
     $original_path = $path = $newpath;
   }
@@ -273,10 +273,10 @@ function front_page_url_outbound_alter(&$path, &$options, &$original_path) {
 /**
  * Implements hook_theme().
  */
-function front_page_theme() {
+function front_theme() {
   return array(
-    'front_page_admin_arrange_form' => array(
-      'file' => 'front_page.admin.inc',
+    'front_admin_arrange_form' => array(
+      'file' => 'front.admin.inc',
       'render element' => 'form',
     ),
   );
@@ -285,22 +285,22 @@ function front_page_theme() {
 /**
  * Implements hook_user_role_delete().
  */
-function front_page_user_role_delete($role) {
+function front_user_role_delete($role) {
   // Delete Front configuration for the role being deleted.
-  config_clear('front_page.settings', "front_page_role_{$role->rid}");
+  config_clear('front.settings', "front_role_{$role->rid}");
 }
 
 /**
  * Function to return the first role enabled in front page, with defaults.
  */
-function _front_page_get_by_rid_with_default($rid) {
-  return config_get('front_page.settings', "front_page_role_{$rid}");
+function _front_get_by_rid_with_default($rid) {
+  return config_get('front.settings', "front_role_{$rid}");
 }
 
 /**
  * Sort by weight ASC and rid DESC.
  */
-function _front_page_sort($a, $b) {
+function _front_sort($a, $b) {
   $a_value = (is_array($a) && isset($a['weight'])) ? $a['weight'] : 0;
   $b_value = (is_array($b) && isset($b['weight'])) ? $b['weight'] : 0;
 

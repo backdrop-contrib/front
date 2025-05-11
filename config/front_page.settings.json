@@ -1,6 +1,6 @@
 {
-    "_config_name": "front_page.settings",
-    "front_page_enable": "0",
-    "front_page_home_link_path": "",
-    "front_page_role_rid": ""
+    "_config_name": "front.settings",
+    "front_enable": "0",
+    "front_home_link_path": "",
+    "front_role_rid": ""
 }
