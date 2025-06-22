@@ -22,6 +22,8 @@ Some notes about this module:
     	     themed Drupal page.
   * Full - Allows you to add content that will be displayed on the screen
              as is. This method is the same as declaring a whole HTML page.
+			 Be aware that for this type, you need to use a text format with
+			 no HTML filters applied, or it may strip out styles, <head> tags, etc.
   * Redirect - Allows you to 301 redirect the user to another path.
   * Alias - Allows you to specify a local path which will then display as
           the home page without redirecting the user.

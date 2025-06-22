@@ -1,6 +1,12 @@
 Front Page
 ==========
 
+2025-06-22
+  Added new verbiage to the README.md file, as well as the admin form, to better 
+  explain how the Full mode works.
+  See: https://github.com/backdrop-contrib/front/issues/3
+  
+
 2025-05-10
   In the process of converting for Backdrop CMS, I found I needed to refactor
   the module to simply be named "front", to match the project name, instead of

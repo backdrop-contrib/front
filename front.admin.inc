@@ -43,7 +43,7 @@ function front_admin($form, &$form_state) {
   $descriptions = array(
     '' => t('Disable functionality for this role.'),
     'themed' => t('Means your default layout, theme and stylesheet will be loaded with your custom front.'),
-    'full' => t('Allows you to have a completely different layout, style sheet etc.'),
+    'full' => t('Allows you to display a front page with a completely different layout, style sheet, etc.'),
     'redirect' => t('Will automatically redirect visitors to a specific page specified in the REDIRECT TO box.'),
     'alias' => t('Will display the page listed in path as if it were the home page. This option does not redirect.'),
   );
@@ -93,9 +93,11 @@ function front_admin($form, &$form_state) {
     $form['roles'][$rid]['data_wrapper']['data'] = array(
       '#type' => 'text_format',
       '#title' => t('Data'),
+	  '#rows' => 10,
       '#default_value' => (isset($front_data[$rid]['data']) && isset($front_data[$rid]['mode']) && ($front_data[$rid]['mode'] == 'themed' || $front_data[$rid]['mode'] == 'full')) ? $front_data[$rid]['data'] : NULL,
       '#format' => !empty($front_data[$rid]['filter_format']) ? $front_data[$rid]['filter_format'] : NULL,
-      '#description' => t('Paste your HTML or TEXT here.') . '<br /><br />' . t('You can paste in the full HTML code for a complete page and include a different style sheet in the HEAD of the document if you want a completely different layout and style to the rest of your site.'),
+      '#description' => t('Paste your HTML or TEXT here.') . '<br><strong>' . t('Note if you selected "Full" mode above:') . '</strong> ' . t('The "Full" mode will not  
+	    display any of your existing theme. Instead, you must enter the full HTML code for a complete front page, including styles and/or javascript in the HEAD of the document, meta tags, etc. If this is your intention, you should also select a text format which does not apply any HTML filters, as that may strip out styles, HEAD tags, etc. You may need to create a new text format for this purpose.'),
     );
 
     $form['roles'][$rid]['path'] = array(
