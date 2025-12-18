@@ -2,7 +2,7 @@ Front Page
 ==========
 
 2025-06-22
-  Added new verbiage to the README.md file, as well as the admin form, to better 
+  Added new verbiage to the README.md file, as well as the admin form, to better  
   explain how the Full mode works.
   See: https://github.com/backdrop-contrib/front/issues/3
   
