@@ -1,7 +1,7 @@
 Front Page
 ==========
 
-This module allows you to specify a custom front page based on the user's role.
+This module allows you to specify a custom front page based on the user's role. 
 
 
 Installation
