@@ -36,11 +36,14 @@ Some notes about this module:
 Current Maintainers
 -------------------
 
-- [Richard Peacock](https://github.com/swampopus) - Originally ported to Backdrop CMS.
+- [Richard Peacock](https://github.com/swampopus)
 - Seeking additional maintainers.
 
 Credits
 -------
+
+- Ported to Backdrop CMS by [Richard Peacock](https://github.com/swampopus)
+
 
 This module is based on the Drupal module front-7.x-2.4
 
